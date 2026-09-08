@@ -46,7 +46,7 @@ This repository is scaffolded as an Expo + TypeScript Android app starter.
 Generate the native Android project into `build/android`:
 
 ```bash
-./build.sh
+./scripts/build.sh
 ```
 
 Build a release APK from the generated native project:

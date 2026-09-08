@@ -1,0 +1,45 @@
+{
+  "name": "aftertouch-app",
+  "version": "0.1.0",
+  "private": true,
+  "main": "expo-router/entry",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo run:android",
+    "emulator": "./scripts/start-emulator.sh",
+    "ios": "expo run:ios",
+    "web": "expo start --web",
+    "typecheck": "tsc --noEmit",
+    "build:native": "./scripts/build.sh",
+    "build:release": "./scripts/build-release.sh",
+    "build:apk": "./scripts/build-release.sh apk",
+    "build:aab": "./scripts/build-release.sh aab",
+    "android:emulator": "./scripts/run-in-emulator.sh"
+  },
+  "dependencies": {
+    "expo": "^57.0.21",
+    "expo-asset": "~57.0.16",
+    "expo-build-properties": "~0.14.8",
+    "expo-constants": "~57.0.17",
+    "expo-linking": "~57.0.9",
+    "expo-router": "^57.0.20",
+    "expo-splash-screen": "^57.0.8",
+    "expo-status-bar": "~2.0.0",
+    "expo-system-ui": "~57.0.3",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "react-native": "0.86.3",
+    "react-native-safe-area-context": "^5.9.1",
+    "react-native-screens": "~4.26.0",
+    "react-native-web": "^0.21.2"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.18",
+    "typescript": "^5.8.0"
+  },
+  "overrides": {
+    "decode-uri-component": "^0.5.0",
+    "uuid": "^14.0.2",
+    "react-native-worklets": "0.12.2"
+  }
+}
