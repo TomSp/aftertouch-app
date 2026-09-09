@@ -14,9 +14,12 @@
     "build:release": "./scripts/build-release.sh",
     "build:apk": "./scripts/build-release.sh apk",
     "build:aab": "./scripts/build-release.sh aab",
-    "android:emulator": "./scripts/run-in-emulator.sh"
+    "android:emulator": "./scripts/run-in-emulator.sh",
+    "test": "jest"
   },
   "dependencies": {
+    "@react-native-async-storage/async-storage": "2.2.0",
+    "@testing-library/react-native": "^13.3.3",
     "expo": "^57.0.21",
     "expo-asset": "~57.0.16",
     "expo-build-properties": "~0.14.8",
@@ -26,6 +29,7 @@
     "expo-splash-screen": "^57.0.8",
     "expo-status-bar": "~2.0.0",
     "expo-system-ui": "~57.0.3",
+    "jest-expo": "~57.0.5",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "react-native": "0.86.3",
@@ -34,12 +38,20 @@
     "react-native-web": "^0.21.2"
   },
   "devDependencies": {
+    "@types/jest": "^30.0.0",
     "@types/react": "^19.2.18",
+    "react-test-renderer": "^19.2.8",
     "typescript": "^5.8.0"
   },
   "overrides": {
     "decode-uri-component": "^0.5.0",
     "uuid": "^14.0.2",
     "react-native-worklets": "0.12.2"
+  },
+  "jest": {
+    "preset": "jest-expo",
+    "modulePathIgnorePatterns": [
+      "<rootDir>/sdk/"
+    ]
   }
 }

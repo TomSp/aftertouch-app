@@ -6,7 +6,7 @@ export default function DetailsScreen() {
   const insets = useSafeAreaInsets();
 
   return (
-    <View style={[styles.safe, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
+    <View style={StyleSheet.flatten([styles.safe, { paddingTop: insets.top, paddingBottom: insets.bottom }])}>
       <View style={styles.container}>
         <Text style={styles.title}>Details</Text>
         <Text style={styles.body}>

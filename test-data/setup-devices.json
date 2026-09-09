@@ -1,0 +1,130 @@
+[
+  {
+    "device_id": "04A316EEB0B6",
+    "product_code": "Wave",
+    "device_serial_number": "U6233077603720048000450",
+    "product_serial_number": "00-00000000-00000",
+    "firmware_version": "27.0.6.46330.5043500 epdbuild.trunk.hepdswbld04.2022-08-04T11:20:29",
+    "ip_address": "192.168.1.187",
+    "name": "EZ SoundTouch",
+    "mac_address": "04A316EEB0B6",
+    "discovery_method": "SSDP/UPnP",
+    "account_id": "4594365",
+    "components": [
+      {
+        "type": "",
+        "category": "SCM",
+        "firmware_version": "27.0.6.46330.5043500 epdbuild.trunk.hepdswbld04.2022-08-04T11:20:29",
+        "serial_number": "U6233077603720048000450"
+      },
+      {
+        "type": "",
+        "category": "PackagedProduct",
+        "firmware_version": "",
+        "serial_number": "00-00000000-00000"
+      }
+    ]
+  },
+  {
+    "device_id": "B0D5CC144817",
+    "product_code": "Cinemate",
+    "device_serial_number": "U6143039302720048000350",
+    "product_serial_number": "y6148373001734435",
+    "firmware_version": "27.0.6.46330.5043500 epdbuild.trunk.hepdswbld04.2022-08-04T11:20:29",
+    "ip_address": "192.168.1.42",
+    "name": "Bose WZ",
+    "mac_address": "B0D5CC144817",
+    "discovery_method": "SSDP/UPnP",
+    "account_id": "4594365",
+    "components": [
+      {
+        "type": "",
+        "category": "SCM",
+        "firmware_version": "27.0.6.46330.5043500 epdbuild.trunk.hepdswbld04.2022-08-04T11:20:29",
+        "serial_number": "U6143039302720048000350"
+      },
+      {
+        "type": "",
+        "category": "PackagedProduct",
+        "firmware_version": "",
+        "serial_number": "y6148373001734435"
+      }
+    ]
+  },
+  {
+    "device_id": "9884E39A19B9",
+    "product_code": "Wave",
+    "device_serial_number": "U7006098501720048000450",
+    "product_serial_number": "00-00000000-00000",
+    "firmware_version": "27.0.6.46330.5043500 epdbuild.trunk.hepdswbld04.2022-08-04T11:20:29",
+    "ip_address": "192.168.1.129",
+    "name": "AZ Soundtouch",
+    "mac_address": "9884E39A19B9",
+    "discovery_method": "SSDP/UPnP",
+    "account_id": "8585172",
+    "components": [
+      {
+        "type": "",
+        "category": "SCM",
+        "firmware_version": "27.0.6.46330.5043500 epdbuild.trunk.hepdswbld04.2022-08-04T11:20:29",
+        "serial_number": "U7006098501720048000450"
+      },
+      {
+        "type": "",
+        "category": "PackagedProduct",
+        "firmware_version": "",
+        "serial_number": "00-00000000-00000"
+      }
+    ]
+  },
+  {
+    "device_id": "192.168.1.166",
+    "product_code": "Bose",
+    "device_serial_number": "",
+    "product_serial_number": "",
+    "firmware_version": "0.0.0",
+    "ip_address": "192.168.1.166",
+    "name": "Bose Keller AZ",
+    "discovery_method": "SSDP/UPnP",
+    "account_id": "default",
+    "components": [
+      {
+        "type": "",
+        "category": "SCM",
+        "firmware_version": "0.0.0",
+        "serial_number": ""
+      },
+      {
+        "type": "",
+        "category": "PackagedProduct",
+        "firmware_version": "",
+        "serial_number": ""
+      }
+    ]
+  },
+  {
+    "device_id": "192.168.1.237",
+    "product_code": "",
+    "device_serial_number": "",
+    "product_serial_number": "",
+    "firmware_version": "0.0.0",
+    "ip_address": "192.168.1.237",
+    "name": "SoundTouch-192.168.1.237",
+    "discovery_method": "SSDP/UPnP",
+    "account_id": "default",
+    "components": [
+      {
+        "type": "",
+        "category": "SCM",
+        "firmware_version": "0.0.0",
+        "serial_number": ""
+      },
+      {
+        "type": "",
+        "category": "PackagedProduct",
+        "firmware_version": "",
+        "serial_number": ""
+      }
+    ]
+  }
+]
