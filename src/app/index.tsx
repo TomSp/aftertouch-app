@@ -74,7 +74,7 @@ export default function HomeScreen() {
                 } else {
 
                     const payload: unknown = await response.json();
-                    console.info('[Aftertouch] Devices response from ' + devicesUri, payload);
+                    console.info('[Aftertouch] Devices response from ' + devicesUri + ' returned HTTP ' + response.status);
                     if (mounted) {
                         setDevices(getDevices(payload));
                     }
@@ -128,11 +128,17 @@ export default function HomeScreen() {
                     const id = deviceValue(device, ['id', 'deviceId', 'serialNumber']);
 
                     return (
-                        <View key={id ?? 'device-' + index} style={styles.deviceCard}>
-                            <Text style={styles.deviceName}>{name}</Text>
-                            {address ? <Text style={styles.deviceDetail}>{address}</Text> : null}
-                            {id && id !== address ? <Text style={styles.deviceDetail}>{id}</Text> : null}
-                        </View>
+                        <Link
+                            key={id ?? 'device-' + index}
+                            href={('/device?ip_address=' + encodeURIComponent(address ?? '') + '&name=' + encodeURIComponent(name)) as never}
+                            asChild
+                        >
+                            <Pressable style={styles.deviceCard} accessibilityLabel={'Open ' + name}>
+                                <Text style={styles.deviceName}>{name}</Text>
+                                {address ? <Text style={styles.deviceDetail}>{address}</Text> : null}
+                                {id && id !== address ? <Text style={styles.deviceDetail}>{id}</Text> : null}
+                            </Pressable>
+                        </Link>
                     );
                 })}
             </ScrollView>

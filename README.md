@@ -29,12 +29,12 @@ This repository is scaffolded as an Expo + TypeScript Android app starter.
      npm run emulator
      ```
    - The emulator starts with a visible window by default. Use `EMULATOR_HEADLESS=1 npm run emulator` if you want it hidden.
-   - Then run the app against the already running emulator with:
+   - Then run the app against a connected Android device with:
      ```bash
-     npm run android:emulator
+     npm run android:device
      ```
-   - The `npm run android:emulator` launcher now regenerates the Android project only when native inputs change.
-   - If you prefer the lower-level flow, run `npm run android` in a second terminal after the emulator is ready.
+   - The `npm run android:device` launcher now regenerates the Android project only when native inputs change.
+   - If you prefer the lower-level flow, run `npm run android` in a second terminal after the device is connected.
 
 4. Build the APK when needed:
    ```bash
@@ -91,4 +91,4 @@ Notes:
 - Release builds require Android signing to be configured in the generated native project.
 - The generated project writes `android/local.properties` with the configured SDK mirror path.
 - If Gradle fails compiling native modules after an Expo or React Native update, run `npx expo install react-native-safe-area-context react-native-screens` and rebuild.
-- The emulator script uses the repo-local AVD in `.android/avd/aftertouch_api36.avd` and the Android SDK mirror in `sdk/android-sdk`.
+- The emulator helper uses the repo-local AVD in `.android/avd/aftertouch_api36.avd`; the app runner requires any connected Android device and uses the Android SDK mirror in `sdk/android-sdk`.

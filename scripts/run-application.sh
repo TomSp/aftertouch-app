@@ -42,10 +42,10 @@ if [ ! -x "$ADB" ]; then
   exit 1
 fi
 
-DEVICE=$($ADB devices | awk '/^emulator-[0-9]+[[:space:]]+device$/ { print $1; exit }')
+DEVICE=$($ADB devices | awk '$2 == "device" { print $1; exit }')
 if [ -z "$DEVICE" ]; then
-  echo "No running Android emulator found." >&2
-  echo "Start one first with: npm run emulator" >&2
+  echo "No connected Android device found." >&2
+  echo "Connect a device and enable USB debugging, then retry." >&2
   exit 1
 fi
 
@@ -53,17 +53,7 @@ export ANDROID_SDK_ROOT="$SDK_DIR"
 export ANDROID_HOME="$SDK_DIR"
 export ANDROID_SERIAL="$DEVICE"
 
-log "Using emulator device: $DEVICE"
-log "Waiting for boot completion..."
-
-"$ADB" -s "$DEVICE" wait-for-device
-while :; do
-  BOOT_COMPLETED=$($ADB -s "$DEVICE" shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')
-  if [ "$BOOT_COMPLETED" = "1" ]; then
-    break
-  fi
-  sleep 2
-done
+log "Using connected Android device: $DEVICE"
 
 rebuild_android_if_needed
 

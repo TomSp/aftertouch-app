@@ -18,6 +18,7 @@ Expo-based Android app starter for Aftertouch.
 - `src/app/index.tsx`: home screen with centered red `Aftertouch App` title and a top-right gear icon for settings
 - `src/app/settings.tsx`: settings screen reachable from the gear icon and header navigation, with an `Aftertouch source` field
 - `src/app/details.tsx`: sample secondary screen
+- `src/app/device.tsx`: device status and control screen
 - `src/app/_layout.tsx`: shared navigation, status bar setup, safe-area provider, and header styling
 - `src/app/+not-found.tsx`: fallback route with home navigation
 
@@ -25,6 +26,7 @@ Expo-based Android app starter for Aftertouch.
 
 - Home is reachable at `/`.
 - Settings is reachable at `/settings`.
+- A device card opens `/device` with the device name and IP address.
 - The home screen exposes settings through a conventional gear icon in the top-right corner.
 - The shared header shows `assets/icon.png` on the left side.
 - The header-left app icon is clickable and navigates to `/`.
@@ -43,18 +45,46 @@ The last valid value is stored locally as an application setting and restored wh
 - when the `Aftertouch source` is not empty, use the `Device Discovery API only Read` to get all known devices
 - list all known devices on this screen, showing each qualifying device `name` and `ip_address`
 
+## Device Status and Controls
+
+- The device page displays the selected device name and IP address.
+- It reads status from the device at `http://<ip_address>:8090/now_playing` and volume from `http://<ip_address>:8090/volume`.
+- It displays the source, playback state, track, artist, volume, and mute state when returned by the device.
+- It supports refresh, play/pause, power, volume increase, and volume decrease actions.
+- Key actions use POST `/key` with XML press and release requests.
+- Volume actions use POST `/volume` with an XML target volume from 0 through 100.
+
 ## Using API
 
 ### Device Discovery API only Read
 
 - Read discovered devices with `GET /setup/devices` on the local AfterTouch service.
-- Return a Json-Array, containing objects containing name and ip_address
-and filter for devices having a non-empty `device_serial_number`
+- Return a JSON array containing objects with `name`, `ip_address`, and `device_serial_number`.
+- The app displays only devices with a non-empty `device_serial_number`.
+
+### Now Playing Status API
+
+- Read the current device status with `GET http://<ip_address>:8090/now_playing`.
+- Parse the XML response for the source, playback state, track, and artist.
+
+### Volume API
+
+- Read the current volume and mute state with `GET http://<ip_address>:8090/volume`.
+- Set the volume with `POST http://<ip_address>:8090/volume` using an XML target volume from 0 through 100.
+
+### Key Control API
+
+- Send device controls with `POST http://<ip_address>:8090/key`.
+- Each key action sends XML `press` and `release` requests with sender `Gabbo`.
+- The device page currently supports `PLAY_PAUSE` and `POWER`.
+
 
 ## Testing
 
 - Home device loading is covered by `tests/index.test.tsx`.
 - The test uses `test-data/setup-devices.json` as the mocked `GET /setup/devices` response.
+- Dedicated device API fixtures are stored in `test-data/now-playing.xml`, `test-data/volume.xml`, and `test-data/key-response.xml`.
+- The device API fixtures represent the `/now_playing` response, the `/volume` response, and the documented `/key` success response.
 - It verifies that only fixture devices with a non-empty `device_serial_number` are rendered with their `name` and `ip_address`, and that the configured API URI is requested.
 - Run the test suite with `npm test -- --runInBand`.
 
@@ -72,6 +102,7 @@ and filter for devices having a non-empty `device_serial_number`
 - Android base: API 36 / Android 16 via `expo-build-properties`
 - SDK mirror downloads into `sdk/android-sdk` by default
 - Run locally with `ANDROID_SDK_ROOT=$PWD/sdk/android-sdk` to keep builds on the cached mirror
+- Run on a connected Android device with `npm run android:device`; the runner proceeds only when ADB reports a device in `device` state
 - Mirror helper: `./scripts/mirror-android-sdk.sh`
 - Native Android project is generated with `npx expo prebuild --platform android`
 - Default release format is APK via `npm run build:release`

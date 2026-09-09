@@ -14,8 +14,9 @@
     "build:release": "./scripts/build-release.sh",
     "build:apk": "./scripts/build-release.sh apk",
     "build:aab": "./scripts/build-release.sh aab",
-    "android:emulator": "./scripts/run-in-emulator.sh",
-    "test": "jest"
+    "android:emulator": "scripts/run-application.sh",
+    "test": "jest",
+    "android:device": "scripts/run-application.sh"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "2.2.0",
@@ -39,6 +40,7 @@
   },
   "devDependencies": {
     "@types/jest": "^30.0.0",
+    "@types/node": "^26.5.0",
     "@types/react": "^19.2.18",
     "react-test-renderer": "^19.2.8",
     "typescript": "^5.8.0"
