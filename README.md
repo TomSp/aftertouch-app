@@ -69,20 +69,37 @@ npm run build:apk
 
 Release artifacts are copied to `build/artifacts/`.
 
-## Install To Phone
+## Deploy Released APK To A Device
 
-Install the release APK to a connected Android device with `adb`:
+1. Enable Developer options and USB debugging on the Android device, connect it by USB, and accept the debugging prompt.
+2. Build the release APK:
 
-```bash
-adb devices
-adb install -r build/artifacts/aftertouch-release.apk
-```
+   ```bash
+   export ANDROID_SDK_ROOT="$PWD/sdk/android-sdk"
+   npm run build:apk
+   ```
 
-Notes:
+3. Verify that ADB reports the device as `device`:
 
-- Enable USB debugging on the phone before connecting it.
-- If `adb devices` shows `unauthorized`, accept the debugging prompt on the phone and run the command again.
-- Use `-r` to replace an existing install without uninstalling first.
+   ```bash
+   ADB="$ANDROID_SDK_ROOT/platform-tools/adb"
+   "$ADB" devices
+   ```
+
+4. Install or replace the APK:
+
+   ```bash
+   "$ADB" install -r build/artifacts/aftertouch-release.apk
+   ```
+
+5. Launch the installed app and verify its package:
+
+   ```bash
+   "$ADB" shell monkey -p berlin.spengler.aftertouch.app 1
+   "$ADB" shell pm list packages | grep berlin.spengler.aftertouch.app
+   ```
+
+If the device is listed as `unauthorized`, accept the USB debugging prompt on the device and run `adb devices` again. Use `-r` to preserve the existing app data while replacing the installed APK.
 
 ## Notes
 
