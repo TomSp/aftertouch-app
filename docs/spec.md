@@ -48,9 +48,9 @@ The last valid value is stored locally as an application setting and restored wh
 ## Device Status and Controls
 
 - The device page displays the selected device name and IP address.
-- It reads status from the device at `http://<ip_address>:8090/now_playing` and volume from `http://<ip_address>:8090/volume`.
-- It displays the source, playback state, track, artist, volume, and mute state when returned by the device.
-- It supports refresh, play/pause, power, volume increase, and volume decrease actions.
+- It reads status from the device at `http://<ip_address>:8090/now_playing`, volume from `http://<ip_address>:8090/volume`, and presets from `http://<ip_address>:8090/presets`.
+- It displays the source, playback state, track, artist, volume, mute state, and configured presets when returned by the device.
+- It supports manual refresh, automatic refresh every 15 seconds, play/pause, power, volume increase, volume decrease, and preset selection actions.
 - Key actions use POST `/key` with XML press and release requests.
 - Volume actions use POST `/volume` with an XML target volume from 0 through 100.
 
@@ -66,6 +66,13 @@ The last valid value is stored locally as an application setting and restored wh
 
 - Read the current device status with `GET http://<ip_address>:8090/now_playing`.
 - Parse the XML response for the source, playback state, track, and artist.
+
+### Presets API
+
+- Read configured presets with `GET http://<ip_address>:8090/presets`.
+- Parse the XML response and display each preset as a button in a 3-column by 2-row block between Status and Volume on the device page.
+- Use `containerArt` as the button image; when it is empty, display the lowercased `itemName` instead.
+- Selecting a preset sends the corresponding `PRESET_<id>` key command.
 
 ### Volume API
 
@@ -83,8 +90,8 @@ The last valid value is stored locally as an application setting and restored wh
 
 - Home device loading is covered by `tests/index.test.tsx`.
 - The test uses `test-data/setup-devices.json` as the mocked `GET /setup/devices` response.
-- Dedicated device API fixtures are stored in `test-data/now-playing.xml`, `test-data/volume.xml`, and `test-data/key-response.xml`.
-- The device API fixtures represent the `/now_playing` response, the `/volume` response, and the documented `/key` success response.
+- Dedicated device API fixtures are stored in `test-data/now-playing.xml`, `test-data/volume.xml`, `test-data/presets.xml`, and `test-data/key-response.xml`.
+- The device API fixtures represent the `/now_playing`, `/volume`, and `/presets` responses, plus the documented `/key` success response.
 - It verifies that only fixture devices with a non-empty `device_serial_number` are rendered with their `name` and `ip_address`, and that the configured API URI is requested.
 - Run the test suite with `npm test -- --runInBand`.
 

@@ -18,6 +18,7 @@ describe('HomeScreen device loading', () => {
     (AsyncStorage.getItem as jest.Mock).mockResolvedValue('http://azsound.home.spengler.berlin:8000');
     global.fetch = jest.fn().mockResolvedValue({
       ok: true,
+      status: 200,
       json: async () => devices
     });
   });

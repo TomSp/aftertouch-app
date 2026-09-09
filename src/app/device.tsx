@@ -1,6 +1,6 @@
-import {useLocalSearchParams} from 'expo-router';
+import {Stack, useLocalSearchParams} from 'expo-router';
 import {useEffect, useState} from 'react';
-import {Pressable, ScrollView, StyleSheet, Text, View} from 'react-native';
+import {Image, Pressable, ScrollView, StyleSheet, Text, View} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 type DeviceStatus = {
@@ -16,6 +16,12 @@ type VolumeStatus = {
     muted: boolean;
 };
 
+type Preset = {
+    id: string;
+    name: string;
+    containerArt: string;
+};
+
 function parameter(value: string | string[] | undefined) {
     return Array.isArray(value) ? value[0] ?? '' : value ?? '';
 }
@@ -28,6 +34,23 @@ function xmlTag(xml: string, tag: string) {
 function xmlAttribute(xml: string, tag: string, attribute: string) {
     const match = xml.match(new RegExp('<' + tag + '\\b[^>]*\\b' + attribute + '="([^"]*)"'));
     return match?.[1] ?? '';
+}
+
+function parsePresets(xml: string): Preset[] {
+    const presets: Preset[] = [];
+    const presetPattern = /<preset\b[^>]*\bid="([^"]+)"[\s\S]*?<itemName>([^<]*)<\/itemName>[\s\S]*?<\/preset>/g;
+    let match = presetPattern.exec(xml);
+
+    while (match) {
+        presets.push({
+            id: match[1],
+            name: match[2].trim() || 'Unnamed preset',
+            containerArt: xmlTag(match[0], 'containerArt')
+        });
+        match = presetPattern.exec(xml);
+    }
+
+    return presets;
 }
 
 async function requestText(uri: string, options?: RequestInit) {
@@ -46,6 +69,7 @@ export default function DeviceScreen() {
     const baseUri = 'http://' + ipAddress + ':8090';
     const [status, setStatus] = useState<DeviceStatus | null>(null);
     const [volume, setVolume] = useState<VolumeStatus | null>(null);
+    const [presets, setPresets] = useState<Preset[]>([]);
     const [loading, setLoading] = useState(true);
     const [busy, setBusy] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -60,9 +84,10 @@ export default function DeviceScreen() {
         setLoading(true);
         setError(null);
         try {
-            const [nowPlayingXml, volumeXml] = await Promise.all([
+            const [nowPlayingXml, volumeXml, presetsXml] = await Promise.all([
                 requestText(baseUri + '/now_playing'),
-                requestText(baseUri + '/volume')
+                requestText(baseUri + '/volume'),
+                requestText(baseUri + '/presets')
             ]);
             console.info('[Aftertouch] Device status response from ' + baseUri);
             setStatus({
@@ -76,6 +101,7 @@ export default function DeviceScreen() {
                 actual: Number(xmlTag(volumeXml, 'actualvolume')) || 0,
                 muted: xmlTag(volumeXml, 'muteenabled').toLowerCase() === 'true'
             });
+            setPresets(parsePresets(presetsXml));
         } catch (requestError) {
             setError(requestError instanceof Error ? requestError.message : 'Unable to load device status.');
         } finally {
@@ -85,6 +111,11 @@ export default function DeviceScreen() {
 
     useEffect(() => {
         void loadStatus();
+        const refreshTimer = setInterval(() => {
+            void loadStatus();
+        }, 15000);
+
+        return () => clearInterval(refreshTimer);
     }, [ipAddress]);
 
     async function sendKey(key: string) {
@@ -125,28 +156,58 @@ export default function DeviceScreen() {
     }
 
     return (
-        <View style={StyleSheet.flatten([styles.safe, {paddingTop: insets.top, paddingBottom: insets.bottom}])}>
+        <>
+            <Stack.Screen options={{title: deviceName}}/>
+            <View style={StyleSheet.flatten([styles.safe, {paddingTop: insets.top, paddingBottom: insets.bottom}])}>
             <ScrollView contentContainerStyle={styles.container}>
-                <Text style={styles.title}>{deviceName}</Text>
-                <Text style={styles.address}>{ipAddress}:8090</Text>
-                {loading ? <Text style={styles.message}>Loading status...</Text> : null}
                 {error ? <Text style={styles.error}>{error}</Text> : null}
                 {status ? <View style={styles.card}>
                     <Text style={styles.sectionTitle}>Status</Text>
+                    <Text style={styles.address}>{ipAddress}:8090</Text>
                     <Text style={styles.value}>Source: {status.source}</Text>
                     <Text style={styles.value}>Playback: {status.playStatus}</Text>
-                    <Text style={styles.value}>Track: {status.track}</Text>
+                    <View style={styles.statusTrackRow}>
+                        <Text style={styles.trackValue}>Track: {status.track}</Text>
+                        <Pressable
+                            accessibilityLabel="Refresh status"
+                            disabled={busy}
+                            onPress={() => void loadStatus()}
+                            style={styles.refreshButton}
+                        >
+                            <Text style={styles.refreshText}>↻</Text>
+                        </Pressable>
+                    </View>
                     {status.artist ? <Text style={styles.value}>Artist: {status.artist}</Text> : null}
                 </View> : null}
+                <View style={styles.card}>
+                    <Text style={styles.sectionTitle}>Presets</Text>
+                    {presets.length > 0 ? <View style={styles.presetGrid}>
+                        {presets.map((preset) => (
+                            <Pressable
+                                key={preset.id}
+                                accessibilityLabel={'Preset ' + preset.id + ': ' + preset.name}
+                                disabled={busy}
+                                onPress={() => void sendKey('PRESET_' + preset.id)}
+                                style={styles.presetButton}
+                            >
+                                {preset.containerArt ? (
+                                    <Image accessibilityIgnoresInvertColors source={{uri: preset.containerArt}} style={styles.presetImage} testID={'preset-image-' + preset.id}/>
+                                ) : (
+                                    <Text style={styles.presetFallback}>{preset.name.toLowerCase()}</Text>
+                                )}
+                            </Pressable>
+                        ))}
+                    </View> : <Text style={styles.message}>No configured presets.</Text>}
+                </View>
                 {volume ? <View style={styles.card}>
                     <Text style={styles.sectionTitle}>Volume</Text>
-                    <Text style={styles.volume}>{volume.muted ? 'Muted' : volume.target + '%'}</Text>
-                    <View style={styles.controls}>
-                        <Pressable disabled={busy} onPress={() => void changeVolume(-5)} style={styles.button}>
-                            <Text style={styles.buttonText}>Volume -</Text>
+                    <View style={styles.volumeControls}>
+                        <Pressable accessibilityLabel="Decrease volume" disabled={busy} onPress={() => void changeVolume(-5)} style={styles.volumeButton}>
+                            <Text style={styles.volumeButtonText}>-</Text>
                         </Pressable>
-                        <Pressable disabled={busy} onPress={() => void changeVolume(5)} style={styles.button}>
-                            <Text style={styles.buttonText}>Volume +</Text>
+                        <Text accessibilityLabel="Current volume" style={styles.volume}>{volume.muted ? 'Muted' : volume.target}</Text>
+                        <Pressable accessibilityLabel="Increase volume" disabled={busy} onPress={() => void changeVolume(5)} style={styles.volumeButton}>
+                            <Text style={styles.volumeButtonText}>+</Text>
                         </Pressable>
                     </View>
                 </View> : null}
@@ -158,17 +219,15 @@ export default function DeviceScreen() {
                         <Text style={styles.buttonText}>Power</Text>
                     </Pressable>
                 </View>
-                <Pressable disabled={busy} onPress={() => void loadStatus()} style={styles.refreshButton}>
-                    <Text style={styles.refreshText}>Refresh status</Text>
-                </Pressable>
             </ScrollView>
-        </View>
+            </View>
+        </>
     );
 }
 
 const styles = StyleSheet.create({
     safe: {flex: 1, backgroundColor: '#0b0b0b'},
-    container: {flexGrow: 1, padding: 24, gap: 16},
+    container: {flexGrow: 1, padding: 24, paddingTop: 0, gap: 16},
     title: {color: '#ffffff', fontSize: 32, fontWeight: '700'},
     address: {color: '#9ca3af', fontSize: 15},
     message: {color: '#d1d5db', fontSize: 16},
@@ -176,10 +235,19 @@ const styles = StyleSheet.create({
     card: {backgroundColor: '#1f2937', borderRadius: 16, padding: 18, gap: 8},
     sectionTitle: {color: '#f87171', fontSize: 14, fontWeight: '700', letterSpacing: 1, textTransform: 'uppercase'},
     value: {color: '#ffffff', fontSize: 17},
-    volume: {color: '#ffffff', fontSize: 28, fontWeight: '700'},
+    statusTrackRow: {minHeight: 24, position: 'relative'},
+    trackValue: {color: '#ffffff', fontSize: 17, lineHeight: 24, paddingRight: 48},
+    presetGrid: {flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', rowGap: 12},
+    presetButton: {width: '31%', aspectRatio: 1, overflow: 'hidden', borderColor: '#6b7280', borderRadius: 12, borderWidth: 1, backgroundColor: '#111827', alignItems: 'center', justifyContent: 'center'},
+    presetImage: {width: '100%', height: '100%'},
+    presetFallback: {color: '#ffffff', fontSize: 13, textAlign: 'center', padding: 8},
+    volume: {color: '#ffffff', fontSize: 28, fontWeight: '700', minWidth: 48, textAlign: 'center'},
+    volumeControls: {alignItems: 'center', flexDirection: 'row', justifyContent: 'space-between'},
+    volumeButton: {alignItems: 'center', backgroundColor: '#ffffff', borderRadius: 999, height: 56, justifyContent: 'center', width: 88},
+    volumeButtonText: {color: '#111111', fontSize: 34, fontWeight: '700', lineHeight: 38},
     controls: {flexDirection: 'row', flexWrap: 'wrap', gap: 12},
     button: {backgroundColor: '#ffffff', borderRadius: 999, paddingHorizontal: 18, paddingVertical: 12},
     buttonText: {color: '#111111', fontSize: 15, fontWeight: '600'},
-    refreshButton: {alignSelf: 'flex-start', borderColor: '#6b7280', borderRadius: 999, borderWidth: 1, paddingHorizontal: 18, paddingVertical: 12},
-    refreshText: {color: '#ffffff', fontSize: 15, fontWeight: '600'}
+    refreshButton: {alignItems: 'center', borderColor: '#6b7280', borderRadius: 999, borderWidth: 1, height: 32, justifyContent: 'center', position: 'absolute', right: 0, top: -4, width: 32},
+    refreshText: {color: '#ffffff', fontSize: 22, fontWeight: '700', lineHeight: 26}
 });
