@@ -1,6 +1,9 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Haptics from 'expo-haptics';
 import Slider from '@react-native-community/slider';
+import {VolumeManager} from 'react-native-volume-manager';
 import {Stack, useLocalSearchParams} from 'expo-router';
-import {useEffect, useState} from 'react';
+import {useEffect, useRef, useState} from 'react';
 import {Image, Pressable, ScrollView, StyleSheet, Text, View} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
@@ -22,6 +25,8 @@ type Preset = {
     name: string;
     containerArt: string;
 };
+
+const HAPTICS_STORAGE_KEY = 'aftertouch.haptics.enabled';
 
 function parameter(value: string | string[] | undefined) {
     return Array.isArray(value) ? value[0] ?? '' : value ?? '';
@@ -62,6 +67,10 @@ async function requestText(uri: string, options?: RequestInit) {
     return response.text();
 }
 
+function wait(milliseconds: number) {
+    return new Promise((resolve) => setTimeout(resolve, milliseconds));
+}
+
 export default function DeviceScreen() {
     const insets = useSafeAreaInsets();
     const {ip_address, name} = useLocalSearchParams<{ip_address?: string | string[]; name?: string | string[]}>();
@@ -74,6 +83,9 @@ export default function DeviceScreen() {
     const [loading, setLoading] = useState(true);
     const [busy, setBusy] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [hapticsEnabled, setHapticsEnabled] = useState(false);
+    const volumeRef = useRef<VolumeStatus | null>(null);
+    const nativeVolumeRef = useRef<number | null>(null);
 
     async function loadStatus() {
         if (!ipAddress) {
@@ -97,11 +109,13 @@ export default function DeviceScreen() {
                 track: xmlTag(nowPlayingXml, 'track') || xmlTag(nowPlayingXml, 'trackTitle') || 'Not playing',
                 artist: xmlTag(nowPlayingXml, 'artist') || xmlTag(nowPlayingXml, 'artistName') || ''
             });
-            setVolume({
+            const nextVolume = {
                 target: Number(xmlTag(volumeXml, 'targetvolume')) || 0,
                 actual: Number(xmlTag(volumeXml, 'actualvolume')) || 0,
                 muted: xmlTag(volumeXml, 'muteenabled').toLowerCase() === 'true'
-            });
+            };
+            volumeRef.current = nextVolume;
+            setVolume(nextVolume);
             setPresets(parsePresets(presetsXml));
         } catch (requestError) {
             setError(requestError instanceof Error ? requestError.message : 'Unable to load device status.');
@@ -111,6 +125,10 @@ export default function DeviceScreen() {
     }
 
     useEffect(() => {
+        AsyncStorage.getItem(HAPTICS_STORAGE_KEY).then((storedHaptics) => {
+            setHapticsEnabled(storedHaptics === 'true');
+        }).catch(() => undefined);
+
         void loadStatus();
         const refreshTimer = setInterval(() => {
             void loadStatus();
@@ -119,13 +137,45 @@ export default function DeviceScreen() {
         return () => clearInterval(refreshTimer);
     }, [ipAddress]);
 
+    useEffect(() => {
+        void VolumeManager.showNativeVolumeUI({enabled: false});
+        const volumeListener = VolumeManager.addVolumeListener((result) => {
+            if (result.type && result.type !== 'music') {
+                return;
+            }
+
+            const previousVolume = nativeVolumeRef.current;
+            nativeVolumeRef.current = result.volume;
+            if (previousVolume === null || previousVolume === result.volume) {
+                return;
+            }
+
+            const currentTarget = volumeRef.current?.target ?? 0;
+            const delta = result.volume > previousVolume ? 1 : -1;
+            void setVolumeValue(Math.max(0, Math.min(100, currentTarget + delta)));
+        });
+
+        return () => {
+            volumeListener.remove();
+            void VolumeManager.showNativeVolumeUI({enabled: true});
+        };
+    }, []);
+
+    function provideHapticFeedback() {
+        if (hapticsEnabled) {
+            void Haptics.selectionAsync();
+        }
+    }
+
     async function sendKey(key: string) {
+        provideHapticFeedback();
         setBusy(true);
         setError(null);
         try {
             const body = (state: string) => '<key state="' + state + '" sender="Gabbo">' + key + '</key>';
             await requestText(baseUri + '/key', {method: 'POST', headers: {'Content-Type': 'application/xml'}, body: body('press')});
             await requestText(baseUri + '/key', {method: 'POST', headers: {'Content-Type': 'application/xml'}, body: body('release')});
+            await wait(2000);
             await loadStatus();
         } catch (requestError) {
             setError(requestError instanceof Error ? requestError.message : 'Unable to control device.');
@@ -134,7 +184,13 @@ export default function DeviceScreen() {
         }
     }
 
-    async function setVolumeValue(nextVolume: number) {
+    async function setVolumeValue(nextVolume: number, reloadStatus = false) {
+        provideHapticFeedback();
+        setVolume((current) => {
+            const next = current ? {...current, target: nextVolume} : current;
+            volumeRef.current = next;
+            return next;
+        });
         setBusy(true);
         setError(null);
         try {
@@ -143,7 +199,10 @@ export default function DeviceScreen() {
                 headers: {'Content-Type': 'application/xml'},
                 body: '<volume>' + nextVolume + '</volume>'
             });
-            await loadStatus();
+            if (reloadStatus) {
+                await wait(2000);
+                await loadStatus();
+            }
         } catch (requestError) {
             setError(requestError instanceof Error ? requestError.message : 'Unable to change volume.');
         } finally {
@@ -156,7 +215,7 @@ export default function DeviceScreen() {
             return;
         }
 
-        await setVolumeValue(Math.max(0, Math.min(100, volume.target + delta)));
+        await setVolumeValue(Math.max(0, Math.min(100, volume.target + delta)), true);
     }
 
     return (
@@ -171,7 +230,6 @@ export default function DeviceScreen() {
                         <Text style={styles.address}>{ipAddress}:8090</Text>
                     </View>
                     <Text style={styles.value}>Source: {status.source}</Text>
-                    <Text style={styles.value}>Playback: {status.playStatus}</Text>
                     <View style={styles.statusTrackRow}>
                         <Text style={styles.trackValue}>Track: {status.track}</Text>
                         <Pressable
@@ -222,7 +280,11 @@ export default function DeviceScreen() {
                             minimumTrackTintColor="#f87171"
                             minimumValue={0}
                             onSlidingComplete={(value) => void setVolumeValue(value)}
-                            onValueChange={(value) => setVolume((current) => current ? {...current, target: value} : current)}
+                            onValueChange={(value) => setVolume((current) => {
+                                const next = current ? {...current, target: value} : current;
+                                volumeRef.current = next;
+                                return next;
+                            })}
                             step={1}
                             style={styles.slider}
                             value={volume.target}
@@ -237,7 +299,7 @@ export default function DeviceScreen() {
                         <Text style={styles.buttonText}>Play / Pause</Text>
                     </Pressable>
                     <Pressable disabled={busy} onPress={() => void sendKey('POWER')} style={styles.button}>
-                        <Text style={styles.buttonText}>Power</Text>
+                        <Text style={styles.buttonText}>{status?.source === 'STANDBY' ? 'Power On' : 'Power Off'}</Text>
                     </Pressable>
                 </View>
             </ScrollView>

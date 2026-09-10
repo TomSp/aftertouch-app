@@ -39,6 +39,7 @@ Expo-based Android app starter for Aftertouch.
 - The settings screen contains an `Aftertouch source` text field. Its value must match `protocol://host:port`,
 with an `http` or `https` protocol, host, and port from `1` through `65535`.
 The last valid value is stored locally as an application setting and restored when the settings screen opens.
+The settings screen also provides a `Haptic feedback` on/off switch. Its state is stored locally as `aftertouch.haptics.enabled`, defaults to off, and controls feedback for device actions.
 
 ## Home
 

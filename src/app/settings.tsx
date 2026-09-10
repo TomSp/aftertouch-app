@@ -1,11 +1,12 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Link } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const SOURCE_PATTERN = /^(https?):\/\/([^/:\s]+|\[[^\]]+\]):(\d{1,5})$/i;
 const SOURCE_STORAGE_KEY = 'aftertouch.source';
+const HAPTICS_STORAGE_KEY = 'aftertouch.haptics.enabled';
 
 function isValidSource(value: string) {
   const match = value.trim().match(SOURCE_PATTERN);
@@ -22,6 +23,7 @@ export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
   const [source, setSource] = useState('');
   const [sourceTouched, setSourceTouched] = useState(false);
+  const [hapticsEnabled, setHapticsEnabled] = useState(false);
   const sourceIsValid = isValidSource(source);
 
   useEffect(() => {
@@ -31,6 +33,12 @@ export default function SettingsScreen() {
       .then((storedSource) => {
         if (mounted && storedSource) {
           setSource(storedSource);
+        }
+        return AsyncStorage.getItem(HAPTICS_STORAGE_KEY);
+      })
+      .then((storedHaptics) => {
+        if (mounted) {
+          setHapticsEnabled(storedHaptics === 'true');
         }
       })
       .catch(() => undefined);
@@ -67,6 +75,22 @@ export default function SettingsScreen() {
             <Text style={styles.error}>Use a valid HTTP source such as http://localhost:8080 or https://device.local:443.</Text>
           ) : null}
         </View>
+        <View style={styles.settingRow}>
+          <View style={styles.settingCopy}>
+            <Text style={styles.label}>Haptic feedback</Text>
+            <Text style={styles.description}>Vibrate briefly when a device control is pressed.</Text>
+          </View>
+          <Switch
+            accessibilityLabel="Haptic feedback"
+            onValueChange={(enabled) => {
+              setHapticsEnabled(enabled);
+              void AsyncStorage.setItem(HAPTICS_STORAGE_KEY, String(enabled));
+            }}
+            thumbColor="#ffffff"
+            trackColor={{false: '#4b5563', true: '#f87171'}}
+            value={hapticsEnabled}
+          />
+        </View>
         <Link href="/" asChild>
           <Pressable style={styles.button}>
             <Text style={styles.buttonText}>Back home</Text>
@@ -96,6 +120,20 @@ const styles = StyleSheet.create({
   },
   field: {
     gap: 8
+  },
+  settingRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 16
+  },
+  settingCopy: {
+    flex: 1,
+    gap: 4
+  },
+  description: {
+    color: '#9ca3af',
+    fontSize: 14
   },
   label: {
     color: '#ffffff',
