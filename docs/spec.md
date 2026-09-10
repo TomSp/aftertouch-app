@@ -52,7 +52,7 @@ The last valid value is stored locally as an application setting and restored wh
 - It displays the source, playback state, track, artist, volume, mute state, and configured presets when returned by the device.
 - It supports manual refresh, automatic refresh every 15 seconds, play/pause, power, volume increase, volume decrease, and preset selection actions.
 - Key actions use POST `/key` with XML press and release requests.
-- Volume actions use POST `/volume` with an XML body in the form `<volume>50</volume>`, with a value from 0 through 100; the outer plus and minus controls change volume in steps of 1, while the inner `++` and `--` controls change volume in steps of 3; each pair is rendered as one connected pill control.
+- Volume actions use POST `/volume` with an XML body in the form `<volume>50</volume>`, with a value from 0 through 100; the volume control is one pill-shaped element containing a 0–100 slider, with a minus button on the left and a plus button on the right; both buttons change volume in steps of 1.
 
 ## Using API
 

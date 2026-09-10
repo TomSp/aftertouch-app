@@ -19,6 +19,11 @@ fi
 if [ ! -e "$ROOT_DIR/node_modules" ]; then
   ln -s build/node_modules "$ROOT_DIR/node_modules"
 fi
+
+SLIDER_MANIFEST="$BUILD_DIR/node_modules/@react-native-community/slider/android/src/main/AndroidManifest.xml"
+if [ -f "$SLIDER_MANIFEST" ]; then
+  sed -i 's/ package="com.reactnativecommunity.slider"//' "$SLIDER_MANIFEST"
+fi
 npx expo prebuild --platform android --clean --no-install
 
 if [ ! -d "$ANDROID_DIR" ]; then

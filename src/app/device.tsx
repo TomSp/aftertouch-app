@@ -1,3 +1,4 @@
+import Slider from '@react-native-community/slider';
 import {Stack, useLocalSearchParams} from 'expo-router';
 import {useEffect, useState} from 'react';
 import {Image, Pressable, ScrollView, StyleSheet, Text, View} from 'react-native';
@@ -133,12 +134,7 @@ export default function DeviceScreen() {
         }
     }
 
-    async function changeVolume(delta: number) {
-        if (!volume) {
-            return;
-        }
-
-        const nextVolume = Math.max(0, Math.min(100, volume.target + delta));
+    async function setVolumeValue(nextVolume: number) {
         setBusy(true);
         setError(null);
         try {
@@ -155,6 +151,14 @@ export default function DeviceScreen() {
         }
     }
 
+    async function changeVolume(delta: number) {
+        if (!volume) {
+            return;
+        }
+
+        await setVolumeValue(Math.max(0, Math.min(100, volume.target + delta)));
+    }
+
     return (
         <>
             <Stack.Screen options={{title: deviceName}}/>
@@ -162,8 +166,10 @@ export default function DeviceScreen() {
             <ScrollView contentContainerStyle={styles.container}>
                 {error ? <Text style={styles.error}>{error}</Text> : null}
                 {status ? <View style={styles.card}>
-                    <Text style={styles.sectionTitle}>Status</Text>
-                    <Text style={styles.address}>{ipAddress}:8090</Text>
+                    <View style={styles.statusHeader}>
+                        <Text style={styles.sectionTitle}>Status</Text>
+                        <Text style={styles.address}>{ipAddress}:8090</Text>
+                    </View>
                     <Text style={styles.value}>Source: {status.source}</Text>
                     <Text style={styles.value}>Playback: {status.playStatus}</Text>
                     <View style={styles.statusTrackRow}>
@@ -200,25 +206,30 @@ export default function DeviceScreen() {
                     </View> : <Text style={styles.message}>No configured presets.</Text>}
                 </View>
                 {volume ? <View style={styles.card}>
-                    <Text style={styles.sectionTitle}>Volume</Text>
-                    <View style={styles.volumeControls}>
-                        <View style={styles.volumeGroup}>
-                            <Pressable accessibilityLabel="Decrease volume" disabled={busy} onPress={() => void changeVolume(-1)} style={styles.volumeButton}>
-                                <Text style={styles.volumeButtonText}>-</Text>
-                            </Pressable>
-                            <Pressable accessibilityLabel="Decrease volume by 3" disabled={busy} onPress={() => void changeVolume(-3)} style={styles.volumeButtonInner}>
-                                <Text style={styles.volumeButtonText}>--</Text>
-                            </Pressable>
-                        </View>
+                    <View style={styles.volumeHeader}>
+                        <Text style={styles.sectionTitle}>Volume</Text>
                         <Text accessibilityLabel="Current volume" style={styles.volume}>{volume.muted ? 'Muted' : volume.target}</Text>
-                        <View style={styles.volumeGroup}>
-                            <Pressable accessibilityLabel="Increase volume by 3" disabled={busy} onPress={() => void changeVolume(3)} style={styles.volumeButtonInner}>
-                                <Text style={styles.volumeButtonText}>++</Text>
-                            </Pressable>
-                            <Pressable accessibilityLabel="Increase volume" disabled={busy} onPress={() => void changeVolume(1)} style={styles.volumeButton}>
-                                <Text style={styles.volumeButtonText}>+</Text>
-                            </Pressable>
-                        </View>
+                    </View>
+                    <View style={styles.volumeControls}>
+                        <Pressable accessibilityLabel="Decrease volume" disabled={busy} onPress={() => void changeVolume(-1)} style={styles.volumeButton}>
+                            <Text style={styles.volumeButtonText}>-</Text>
+                        </Pressable>
+                        <Slider
+                            accessibilityLabel="Volume slider"
+                            disabled={busy}
+                            maximumTrackTintColor="#6b7280"
+                            maximumValue={100}
+                            minimumTrackTintColor="#f87171"
+                            minimumValue={0}
+                            onSlidingComplete={(value) => void setVolumeValue(value)}
+                            onValueChange={(value) => setVolume((current) => current ? {...current, target: value} : current)}
+                            step={1}
+                            style={styles.slider}
+                            value={volume.target}
+                        />
+                        <Pressable accessibilityLabel="Increase volume" disabled={busy} onPress={() => void changeVolume(1)} style={styles.volumeButton}>
+                            <Text style={styles.volumeButtonText}>+</Text>
+                        </Pressable>
                     </View>
                 </View> : null}
                 <View style={styles.controls}>
@@ -239,11 +250,12 @@ const styles = StyleSheet.create({
     safe: {flex: 1, backgroundColor: '#0b0b0b'},
     container: {flexGrow: 1, padding: 24, paddingTop: 0, gap: 16},
     title: {color: '#ffffff', fontSize: 32, fontWeight: '700'},
-    address: {color: '#9ca3af', fontSize: 15},
+    address: {color: '#9ca3af', flexShrink: 1, fontSize: 15, textAlign: 'right'},
     message: {color: '#d1d5db', fontSize: 16},
     error: {color: '#f87171', fontSize: 16},
     card: {backgroundColor: '#1f2937', borderRadius: 16, padding: 18, gap: 8},
     sectionTitle: {color: '#f87171', fontSize: 14, fontWeight: '700', letterSpacing: 1, textTransform: 'uppercase'},
+    statusHeader: {alignItems: 'center', flexDirection: 'row', justifyContent: 'space-between'},
     value: {color: '#ffffff', fontSize: 17},
     statusTrackRow: {minHeight: 24, position: 'relative'},
     trackValue: {color: '#ffffff', fontSize: 17, lineHeight: 24, paddingRight: 48},
@@ -251,11 +263,11 @@ const styles = StyleSheet.create({
     presetButton: {width: '31%', aspectRatio: 1, overflow: 'hidden', borderColor: '#6b7280', borderRadius: 12, borderWidth: 1, backgroundColor: '#111827', alignItems: 'center', justifyContent: 'center'},
     presetImage: {width: '100%', height: '100%'},
     presetFallback: {color: '#ffffff', fontSize: 13, textAlign: 'center', padding: 8},
-    volume: {color: '#ffffff', fontSize: 28, fontWeight: '700', minWidth: 48, textAlign: 'center'},
-    volumeControls: {alignItems: 'center', flexDirection: 'row', justifyContent: 'space-between'},
-    volumeGroup: {backgroundColor: '#ffffff', borderRadius: 999, flexDirection: 'row', overflow: 'hidden'},
+    volumeHeader: {minHeight: 34, justifyContent: 'center', position: 'relative'},
+    volume: {color: '#ffffff', fontSize: 28, fontWeight: '700', left: 0, position: 'absolute', right: 0, textAlign: 'center'},
+    volumeControls: {alignItems: 'center', backgroundColor: '#ffffff', borderRadius: 999, flexDirection: 'row', gap: 4, overflow: 'hidden', paddingHorizontal: 4},
+    slider: {flex: 1, height: 40},
     volumeButton: {alignItems: 'center', backgroundColor: '#ffffff', height: 48, justifyContent: 'center', width: 56},
-    volumeButtonInner: {alignItems: 'center', backgroundColor: '#ffffff', borderLeftColor: '#d1d5db', borderLeftWidth: 1, height: 48, justifyContent: 'center', width: 56},
     volumeButtonText: {color: '#111111', fontSize: 28, fontWeight: '700', lineHeight: 32},
     controls: {flexDirection: 'row', flexWrap: 'wrap', gap: 12},
     button: {backgroundColor: '#ffffff', borderRadius: 999, paddingHorizontal: 18, paddingVertical: 12},
