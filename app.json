@@ -14,7 +14,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#111111"
-      }
+      },
+      "usesCleartextTraffic": true
     },
     "plugins": [
       [
@@ -37,6 +38,7 @@
           }
         }
       ],
+      "./plugins/withCleartextTraffic",
       "expo-asset"
     ],
     "experiments": {

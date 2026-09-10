@@ -145,7 +145,7 @@ export default function DeviceScreen() {
             await requestText(baseUri + '/volume', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/xml'},
-                body: '<volume><targetvolume>' + nextVolume + '</targetvolume></volume>'
+                body: '<volume>' + nextVolume + '</volume>'
             });
             await loadStatus();
         } catch (requestError) {
@@ -202,13 +202,23 @@ export default function DeviceScreen() {
                 {volume ? <View style={styles.card}>
                     <Text style={styles.sectionTitle}>Volume</Text>
                     <View style={styles.volumeControls}>
-                        <Pressable accessibilityLabel="Decrease volume" disabled={busy} onPress={() => void changeVolume(-5)} style={styles.volumeButton}>
-                            <Text style={styles.volumeButtonText}>-</Text>
-                        </Pressable>
+                        <View style={styles.volumeGroup}>
+                            <Pressable accessibilityLabel="Decrease volume" disabled={busy} onPress={() => void changeVolume(-1)} style={styles.volumeButton}>
+                                <Text style={styles.volumeButtonText}>-</Text>
+                            </Pressable>
+                            <Pressable accessibilityLabel="Decrease volume by 3" disabled={busy} onPress={() => void changeVolume(-3)} style={styles.volumeButtonInner}>
+                                <Text style={styles.volumeButtonText}>--</Text>
+                            </Pressable>
+                        </View>
                         <Text accessibilityLabel="Current volume" style={styles.volume}>{volume.muted ? 'Muted' : volume.target}</Text>
-                        <Pressable accessibilityLabel="Increase volume" disabled={busy} onPress={() => void changeVolume(5)} style={styles.volumeButton}>
-                            <Text style={styles.volumeButtonText}>+</Text>
-                        </Pressable>
+                        <View style={styles.volumeGroup}>
+                            <Pressable accessibilityLabel="Increase volume by 3" disabled={busy} onPress={() => void changeVolume(3)} style={styles.volumeButtonInner}>
+                                <Text style={styles.volumeButtonText}>++</Text>
+                            </Pressable>
+                            <Pressable accessibilityLabel="Increase volume" disabled={busy} onPress={() => void changeVolume(1)} style={styles.volumeButton}>
+                                <Text style={styles.volumeButtonText}>+</Text>
+                            </Pressable>
+                        </View>
                     </View>
                 </View> : null}
                 <View style={styles.controls}>
@@ -243,8 +253,10 @@ const styles = StyleSheet.create({
     presetFallback: {color: '#ffffff', fontSize: 13, textAlign: 'center', padding: 8},
     volume: {color: '#ffffff', fontSize: 28, fontWeight: '700', minWidth: 48, textAlign: 'center'},
     volumeControls: {alignItems: 'center', flexDirection: 'row', justifyContent: 'space-between'},
-    volumeButton: {alignItems: 'center', backgroundColor: '#ffffff', borderRadius: 999, height: 56, justifyContent: 'center', width: 88},
-    volumeButtonText: {color: '#111111', fontSize: 34, fontWeight: '700', lineHeight: 38},
+    volumeGroup: {backgroundColor: '#ffffff', borderRadius: 999, flexDirection: 'row', overflow: 'hidden'},
+    volumeButton: {alignItems: 'center', backgroundColor: '#ffffff', height: 48, justifyContent: 'center', width: 56},
+    volumeButtonInner: {alignItems: 'center', backgroundColor: '#ffffff', borderLeftColor: '#d1d5db', borderLeftWidth: 1, height: 48, justifyContent: 'center', width: 56},
+    volumeButtonText: {color: '#111111', fontSize: 28, fontWeight: '700', lineHeight: 32},
     controls: {flexDirection: 'row', flexWrap: 'wrap', gap: 12},
     button: {backgroundColor: '#ffffff', borderRadius: 999, paddingHorizontal: 18, paddingVertical: 12},
     buttonText: {color: '#111111', fontSize: 15, fontWeight: '600'},

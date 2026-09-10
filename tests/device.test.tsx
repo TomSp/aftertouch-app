@@ -82,6 +82,19 @@ describe('DeviceScreen API interactions', () => {
         });
     });
 
+    it('changes volume by 3 with the extended controls', async () => {
+        const screen = renderDevice();
+        await screen.findByText('25');
+
+        fireEvent.press(screen.getByLabelText('Increase volume by 3'));
+
+        await waitFor(() => {
+            const volumeRequests = (global.fetch as jest.Mock).mock.calls.filter(([uri, options]) => uri.endsWith('/volume') && options);
+            expect(volumeRequests).toHaveLength(1);
+            expect(volumeRequests[0][1]).toMatchObject({method: 'POST', body: '<volume>28</volume>'});
+        });
+    });
+
     it('sets the next volume through the volume API', async () => {
         const screen = renderDevice();
         await screen.findByText('25');
@@ -91,7 +104,7 @@ describe('DeviceScreen API interactions', () => {
         await waitFor(() => {
             const volumeRequests = (global.fetch as jest.Mock).mock.calls.filter(([uri, options]) => uri.endsWith('/volume') && options);
             expect(volumeRequests).toHaveLength(1);
-            expect(volumeRequests[0][1]).toMatchObject({method: 'POST', body: '<volume><targetvolume>30</targetvolume></volume>'});
+            expect(volumeRequests[0][1]).toMatchObject({method: 'POST', body: '<volume>26</volume>'});
         });
     });
 });
