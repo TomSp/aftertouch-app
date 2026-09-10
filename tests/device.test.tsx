@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Haptics from 'expo-haptics';
 import {fireEvent, render, waitFor} from '@testing-library/react-native';
+import {Platform} from 'react-native';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import DeviceScreen from '../src/app/device';
 
@@ -16,7 +17,13 @@ jest.mock('@react-native-async-storage/async-storage', () => ({
 }));
 
 jest.mock('expo-haptics', () => ({
+    AndroidHaptics: {Virtual_Key: 'virtual-key'},
+    performAndroidHapticsAsync: jest.fn().mockResolvedValue(undefined),
     selectionAsync: jest.fn().mockResolvedValue(undefined)
+}));
+
+jest.mock('../src/native/forcedVibration', () => ({
+    vibrateBypass: jest.fn()
 }));
 
 jest.mock('react-native-volume-manager', () => ({
@@ -46,6 +53,7 @@ function response(text: string) {
 describe('DeviceScreen API interactions', () => {
     beforeEach(() => {
         jest.clearAllMocks();
+        Object.defineProperty(Platform, 'OS', {value: 'android'});
         (AsyncStorage.getItem as jest.Mock).mockResolvedValue(null);
         global.fetch = jest.fn().mockImplementation((uri: string, options?: RequestInit) => {
             if (uri.endsWith('/now_playing')) {
@@ -109,8 +117,9 @@ describe('DeviceScreen API interactions', () => {
 
         fireEvent.press(screen.getByText('Power On'));
 
-        expect(Haptics.selectionAsync).toHaveBeenCalledTimes(1);
         await waitFor(() => {
+            expect(require('../src/native/forcedVibration').vibrateBypass).toHaveBeenCalledWith(120);
+            expect(Haptics.performAndroidHapticsAsync).toHaveBeenCalledWith(Haptics.AndroidHaptics.Virtual_Key);
             expect((global.fetch as jest.Mock).mock.calls.filter(([uri]) => uri.endsWith('/now_playing'))).toHaveLength(2);
         }, {timeout: 4000});
     });

@@ -1,10 +1,12 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Constants from 'expo-constants';
 import {Link} from 'expo-router';
 import {useEffect, useState} from 'react';
 import {Pressable, ScrollView, StyleSheet, Text, View} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 const SOURCE_STORAGE_KEY = 'aftertouch.source';
+const APP_VERSION = Constants.expoConfig?.version ?? '0.0.0';
 type Device = Record<string, unknown>;
 
 function isDiscoveredDevice(device: unknown): device is Device {
@@ -142,6 +144,7 @@ export default function HomeScreen() {
                     );
                 })}
             </ScrollView>
+            <Text style={StyleSheet.flatten([styles.version, {bottom: insets.bottom + 12}])}>v{APP_VERSION}</Text>
         </View>
     );
 }
@@ -205,5 +208,11 @@ const styles = StyleSheet.create({
     deviceDetail: {
         color: '#4b5563',
         fontSize: 15
+    },
+    version: {
+        position: 'absolute',
+        right: 12,
+        color: '#9ca3af',
+        fontSize: 12
     }
 });

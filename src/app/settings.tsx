@@ -1,12 +1,24 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Haptics from 'expo-haptics';
 import { Link } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Pressable, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
+import { Platform, Pressable, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import {vibrateBypass} from '../native/forcedVibration';
 
 const SOURCE_PATTERN = /^(https?):\/\/([^/:\s]+|\[[^\]]+\]):(\d{1,5})$/i;
 const SOURCE_STORAGE_KEY = 'aftertouch.source';
 const HAPTICS_STORAGE_KEY = 'aftertouch.haptics.enabled';
+
+function testHapticFeedback() {
+  if (Platform.OS === 'android') {
+    vibrateBypass(250);
+    void Haptics.performAndroidHapticsAsync(Haptics.AndroidHaptics.Confirm).catch(() => undefined);
+    return;
+  }
+
+  void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => undefined);
+}
 
 function isValidSource(value: string) {
   const match = value.trim().match(SOURCE_PATTERN);
@@ -91,6 +103,9 @@ export default function SettingsScreen() {
             value={hapticsEnabled}
           />
         </View>
+        <Pressable accessibilityLabel="Test vibration" onPress={testHapticFeedback} style={styles.button}>
+          <Text style={styles.buttonText}>Test vibration</Text>
+        </Pressable>
         <Link href="/" asChild>
           <Pressable style={styles.button}>
             <Text style={styles.buttonText}>Back home</Text>

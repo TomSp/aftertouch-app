@@ -72,34 +72,34 @@ Release artifacts are copied to `build/artifacts/`.
 ## Deploy Released APK To A Device
 
 1. Enable Developer options and USB debugging on the Android device, connect it by USB, and accept the debugging prompt.
-2. Build the release APK:
+2. Deploy the release APK:
 
    ```bash
    export ANDROID_SDK_ROOT="$PWD/sdk/android-sdk"
-   npm run build:apk
+   npm run deploy:release
    ```
 
-3. Verify that ADB reports the device as `device`:
+The deploy script builds `build/artifacts/aftertouch-release.apk` if it is missing, installs it with `adb install -r`, and launches the app. To force a fresh release build before installing:
 
-   ```bash
-   ADB="$ANDROID_SDK_ROOT/platform-tools/adb"
-   "$ADB" devices
-   ```
+```bash
+npm run deploy:release -- --build
+```
 
-4. Install or replace the APK:
+If more than one device is connected, pass a serial with `npm run deploy:release -- --device SERIAL`. If the device is listed as `unauthorized`, accept the USB debugging prompt on the device and retry. Use `--no-launch` to install without starting the app.
 
-   ```bash
-   "$ADB" install -r build/artifacts/aftertouch-release.apk
-   ```
+## Publish A GitHub Release
 
-5. Launch the installed app and verify its package:
+Release automation requires a clean git worktree and the GitHub CLI (`gh`) authenticated for this repository. It builds the current app version, creates and pushes a `vX.Y.Z` tag, publishes the built artifact as a GitHub release, then bumps the patch version and pushes that bump commit.
 
-   ```bash
-   "$ADB" shell monkey -p berlin.spengler.aftertouch.app 1
-   "$ADB" shell pm list packages | grep berlin.spengler.aftertouch.app
-   ```
+```bash
+npm run release:github
+```
 
-If the device is listed as `unauthorized`, accept the USB debugging prompt on the device and run `adb devices` again. Use `-r` to preserve the existing app data while replacing the installed APK.
+Build and publish an Android App Bundle instead of the APK:
+
+```bash
+npm run release:github -- aab
+```
 
 ## Notes
 

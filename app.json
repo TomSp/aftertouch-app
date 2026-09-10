@@ -15,7 +15,10 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#111111"
       },
-      "usesCleartextTraffic": true
+      "usesCleartextTraffic": true,
+      "permissions": [
+        "VIBRATE"
+      ]
     },
     "plugins": [
       [
@@ -39,7 +42,8 @@
         }
       ],
       "./plugins/withCleartextTraffic",
-      "expo-asset"
+      "expo-asset",
+      "./plugins/withForcedVibration"
     ],
     "experiments": {
       "typedRoutes": true

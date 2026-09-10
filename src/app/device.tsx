@@ -4,8 +4,9 @@ import Slider from '@react-native-community/slider';
 import {VolumeManager} from 'react-native-volume-manager';
 import {Stack, useLocalSearchParams} from 'expo-router';
 import {useEffect, useRef, useState} from 'react';
-import {Image, Pressable, ScrollView, StyleSheet, Text, View} from 'react-native';
+import {Image, Platform, Pressable, ScrollView, StyleSheet, Text, View} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import {vibrateBypass} from '../native/forcedVibration';
 
 type DeviceStatus = {
     source: string;
@@ -161,10 +162,28 @@ export default function DeviceScreen() {
         };
     }, []);
 
-    function provideHapticFeedback() {
-        if (hapticsEnabled) {
-            void Haptics.selectionAsync();
+    function triggerHapticFeedback() {
+        if (Platform.OS === 'android') {
+            vibrateBypass(120);
+            void Haptics.performAndroidHapticsAsync(Haptics.AndroidHaptics.Virtual_Key).catch(() => undefined);
+            return;
         }
+
+        void Haptics.selectionAsync().catch(() => undefined);
+    }
+
+    function provideHapticFeedback() {
+        void AsyncStorage.getItem(HAPTICS_STORAGE_KEY).then((storedHaptics) => {
+            const enabled = storedHaptics === 'true';
+            setHapticsEnabled(enabled);
+            if (enabled) {
+                triggerHapticFeedback();
+            }
+        }).catch(() => {
+            if (hapticsEnabled) {
+                triggerHapticFeedback();
+            }
+        });
     }
 
     async function sendKey(key: string) {
