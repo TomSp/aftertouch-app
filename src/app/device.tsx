@@ -72,6 +72,22 @@ function wait(milliseconds: number) {
     return new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
 
+function storedMusicDisplay(track: string, artist: string) {
+    if (artist || !track.includes('-')) {
+        return {track, artist};
+    }
+
+    const separator = track.indexOf('-');
+    const derivedArtist = track.slice(0, separator).trim();
+    const derivedTrack = track.slice(separator + 1).trim();
+
+    if (!derivedArtist || !derivedTrack) {
+        return {track, artist};
+    }
+
+    return {track: derivedTrack, artist: derivedArtist};
+}
+
 export default function DeviceScreen() {
     const insets = useSafeAreaInsets();
     const {ip_address, name} = useLocalSearchParams<{ip_address?: string | string[]; name?: string | string[]}>();
@@ -103,13 +119,14 @@ export default function DeviceScreen() {
                 requestText(baseUri + '/volume'),
                 requestText(baseUri + '/presets')
             ]);
-            console.info('[Aftertouch] Device status response from ' + baseUri);
+//            console.info('[Aftertouch] Device status response from ' + baseUri);
             setStatus({
                 source: xmlAttribute(nowPlayingXml, 'nowPlaying', 'source') || 'Unknown',
-                playStatus: xmlAttribute(nowPlayingXml, 'nowPlaying', 'playStatus') || 'Unknown',
+                playStatus: xmlTag(nowPlayingXml, 'playStatus') || '',
                 track: xmlTag(nowPlayingXml, 'track') || xmlTag(nowPlayingXml, 'trackTitle') || 'Not playing',
                 artist: xmlTag(nowPlayingXml, 'artist') || xmlTag(nowPlayingXml, 'artistName') || ''
             });
+//            console.info('[Aftertouch] Device status' + status?.playStatus);
             const nextVolume = {
                 target: Number(xmlTag(volumeXml, 'targetvolume')) || 0,
                 actual: Number(xmlTag(volumeXml, 'actualvolume')) || 0,
@@ -237,6 +254,17 @@ export default function DeviceScreen() {
         await setVolumeValue(Math.max(0, Math.min(100, volume.target + delta)), true);
     }
 
+    const sourceKey = status?.source.toLowerCase();
+    const isStandby = sourceKey === 'standby';
+    const isIntune = sourceKey === 'intune' || sourceKey === 'tunein';
+    const isStoredMusic = sourceKey === 'stored_music';
+    const displayStatus = status && isStoredMusic ? storedMusicDisplay(status.track, status.artist) : status;
+    const isPlaying = status?.playStatus === 'PLAY_STATE';
+    const secondaryLabel = isIntune ? 'Station' : 'Track';
+    const secondaryValue = isStandby ? '' : displayStatus?.track ?? '';
+    const secondaryText = secondaryValue ? secondaryLabel + ': ' + secondaryValue : '';
+    const tertiaryValue = isStandby || isIntune ? '' : displayStatus?.artist ?? '';
+
     return (
         <>
             <Stack.Screen options={{title: deviceName}}/>
@@ -246,21 +274,23 @@ export default function DeviceScreen() {
                 {status ? <View style={styles.card}>
                     <View style={styles.statusHeader}>
                         <Text style={styles.sectionTitle}>Status</Text>
-                        <Text style={styles.address}>{ipAddress}:8090</Text>
+                        <View style={styles.endpointRow}>
+                            <Text style={styles.address}>{ipAddress}:8090</Text>
+                            <Pressable
+                                accessibilityLabel="Refresh status"
+                                disabled={busy}
+                                onPress={() => void loadStatus()}
+                                style={styles.refreshButton}
+                            >
+                                <Text style={styles.refreshText}>↻</Text>
+                            </Pressable>
+                        </View>
                     </View>
                     <Text style={styles.value}>Source: {status.source}</Text>
                     <View style={styles.statusTrackRow}>
-                        <Text style={styles.trackValue}>Track: {status.track}</Text>
-                        <Pressable
-                            accessibilityLabel="Refresh status"
-                            disabled={busy}
-                            onPress={() => void loadStatus()}
-                            style={styles.refreshButton}
-                        >
-                            <Text style={styles.refreshText}>↻</Text>
-                        </Pressable>
+                        <Text numberOfLines={1} ellipsizeMode="tail" style={styles.trackValue}>{secondaryText}</Text>
                     </View>
-                    {status.artist ? <Text style={styles.value}>Artist: {status.artist}</Text> : null}
+                    <Text numberOfLines={1} ellipsizeMode="tail" style={styles.value}>{tertiaryValue ? 'Artist: ' + tertiaryValue : ''}</Text>
                 </View> : null}
                 <View style={styles.card}>
                     <Text style={styles.sectionTitle}>Presets</Text>
@@ -314,11 +344,11 @@ export default function DeviceScreen() {
                     </View>
                 </View> : null}
                 <View style={styles.controls}>
-                    <Pressable disabled={busy} onPress={() => void sendKey('PLAY_PAUSE')} style={styles.button}>
-                        <Text style={styles.buttonText}>Play / Pause</Text>
+                    <Pressable accessibilityLabel={isPlaying ? 'Pause' : 'Play'} disabled={busy || isStandby} onPress={() => void sendKey('PLAY_PAUSE')} style={StyleSheet.flatten([styles.button, (busy || isStandby) && styles.buttonDisabled])}>
+                        <Text style={StyleSheet.flatten([styles.buttonText, (busy || isStandby) && styles.buttonTextDisabled])}>{isPlaying ? '⏸' : '▶'}</Text>
                     </Pressable>
                     <Pressable disabled={busy} onPress={() => void sendKey('POWER')} style={styles.button}>
-                        <Text style={styles.buttonText}>{status?.source === 'STANDBY' ? 'Power On' : 'Power Off'}</Text>
+                        <Text style={styles.buttonText}>{isStandby ? 'Power On' : 'Power Off'}</Text>
                     </Pressable>
                 </View>
             </ScrollView>
@@ -337,9 +367,10 @@ const styles = StyleSheet.create({
     card: {backgroundColor: '#1f2937', borderRadius: 16, padding: 18, gap: 8},
     sectionTitle: {color: '#f87171', fontSize: 14, fontWeight: '700', letterSpacing: 1, textTransform: 'uppercase'},
     statusHeader: {alignItems: 'center', flexDirection: 'row', justifyContent: 'space-between'},
+    endpointRow: {alignItems: 'center', flexDirection: 'row', gap: 8},
     value: {color: '#ffffff', fontSize: 17},
-    statusTrackRow: {minHeight: 24, position: 'relative'},
-    trackValue: {color: '#ffffff', fontSize: 17, lineHeight: 24, paddingRight: 48},
+    statusTrackRow: {minHeight: 24},
+    trackValue: {color: '#ffffff', fontSize: 17, lineHeight: 24},
     presetGrid: {flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', rowGap: 12},
     presetButton: {width: '31%', aspectRatio: 1, overflow: 'hidden', borderColor: '#6b7280', borderRadius: 12, borderWidth: 1, backgroundColor: '#111827', alignItems: 'center', justifyContent: 'center'},
     presetImage: {width: '100%', height: '100%'},
@@ -353,6 +384,8 @@ const styles = StyleSheet.create({
     controls: {flexDirection: 'row', flexWrap: 'wrap', gap: 12},
     button: {backgroundColor: '#ffffff', borderRadius: 999, paddingHorizontal: 18, paddingVertical: 12},
     buttonText: {color: '#111111', fontSize: 15, fontWeight: '600'},
-    refreshButton: {alignItems: 'center', borderColor: '#6b7280', borderRadius: 999, borderWidth: 1, height: 32, justifyContent: 'center', position: 'absolute', right: 0, top: -4, width: 32},
+    buttonDisabled: {backgroundColor: '#4b5563'},
+    buttonTextDisabled: {color: '#9ca3af'},
+    refreshButton: {alignItems: 'center', borderColor: '#6b7280', borderRadius: 999, borderWidth: 1, height: 32, justifyContent: 'center', width: 32},
     refreshText: {color: '#ffffff', fontSize: 22, fontWeight: '700', lineHeight: 26}
 });

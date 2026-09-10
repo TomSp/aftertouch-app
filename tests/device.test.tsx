@@ -79,8 +79,9 @@ describe('DeviceScreen API interactions', () => {
         const screen = renderDevice();
 
         await waitFor(() => expect(screen.getByText(/STANDBY/)).toBeTruthy());
-        expect(screen.getByText('Track: Not playing')).toBeTruthy();
+        expect(screen.queryByText('Track: Not playing')).toBeNull();
         expect(screen.getByText('Power On')).toBeTruthy();
+        expect(screen.getByLabelText('Play')).toBeDisabled();
         expect(screen.getByText('25')).toBeTruthy();
         expect(screen.getByLabelText('Preset 1: 94.3 RS2')).toBeTruthy();
         expect(screen.getByTestId('preset-image-1').props.source).toEqual({uri: 'http://cdn-profiles.tunein.com/s25221/images/logoq.jpg?t=2'});
@@ -99,13 +100,13 @@ describe('DeviceScreen API interactions', () => {
         const screen = renderDevice();
         await screen.findByText('25');
 
-        fireEvent.press(screen.getByText('Play / Pause'));
+        fireEvent.press(screen.getByText('Power On'));
 
         await waitFor(() => {
             const keyRequests = (global.fetch as jest.Mock).mock.calls.filter(([uri]) => uri.endsWith('/key'));
             expect(keyRequests).toHaveLength(2);
-            expect(keyRequests[0][1]).toMatchObject({method: 'POST', body: '<key state="press" sender="Gabbo">PLAY_PAUSE</key>'});
-            expect(keyRequests[1][1]).toMatchObject({method: 'POST', body: '<key state="release" sender="Gabbo">PLAY_PAUSE</key>'});
+            expect(keyRequests[0][1]).toMatchObject({method: 'POST', body: '<key state="press" sender="Gabbo">POWER</key>'});
+            expect(keyRequests[1][1]).toMatchObject({method: 'POST', body: '<key state="release" sender="Gabbo">POWER</key>'});
             expect((global.fetch as jest.Mock).mock.calls.filter(([uri]) => uri.endsWith('/now_playing'))).toHaveLength(2);
         }, {timeout: 4000});
     });
