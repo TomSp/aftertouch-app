@@ -116,7 +116,7 @@ export default function HomeScreen() {
                 </Pressable>
             </Link>
             <ScrollView contentContainerStyle={styles.container}>
-                <Text style={styles.title}>Aftertouch App</Text>
+                <Text style={styles.title}>Aftertouch</Text>
                 {!sourceConfigured ?
                     <Text style={styles.message}>Configure an Aftertouch source in Settings.</Text> : null}
                 {loading ? <Text style={styles.message}>Loading devices...</Text> : null}
