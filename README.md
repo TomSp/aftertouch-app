@@ -89,7 +89,7 @@ If more than one device is connected, pass a serial with `npm run deploy:release
 
 ## Publish A GitHub Release
 
-Release automation requires a clean git worktree and the GitHub CLI (`gh`) authenticated for this repository. It builds the current app version, creates and pushes a `vX.Y.Z` tag, publishes the built artifact as a GitHub release, then bumps the patch version and pushes that bump commit.
+Release automation requires a clean git worktree and the GitHub CLI (`gh`) authenticated for this repository. It builds the current app version, proposes release notes from commit messages since the latest `v*` tag, creates and pushes a `vX.Y.Z` tag, publishes the built artifact as a GitHub release, then bumps the patch version and pushes that bump commit. The generated notes open in an editor before publishing. Set `RELEASE_EDITOR` to choose the editor, or set `RELEASE_NOTES` to change the initial text.
 
 ```bash
 npm run release:github

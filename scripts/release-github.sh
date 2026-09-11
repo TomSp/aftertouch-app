@@ -17,7 +17,8 @@ then bumps the patch version and pushes that bump commit.
 Environment:
   GIT_REMOTE      Git remote to push to. Defaults to origin.
   GIT_BRANCH      Branch to push the version bump to. Defaults to current branch.
-  RELEASE_NOTES   Optional release notes text. Defaults to "Release <tag>".
+  RELEASE_NOTES   Optional initial release notes text. Defaults to commit messages since the latest v* tag.
+  RELEASE_EDITOR  Editor command for release notes. Defaults to VISUAL, EDITOR, or vi.
 EOF
 }
 
@@ -30,6 +31,38 @@ require_command() {
 
 current_version() {
   node -e "const p=require('./package.json'); const a=require('./app.json'); if (p.version !== a.expo.version) { console.error('package.json version (' + p.version + ') does not match app.json expo.version (' + a.expo.version + ')'); process.exit(1); } console.log(p.version);"
+}
+
+proposed_release_notes() {
+  PREVIOUS_TAG=$(git tag --list 'v*' --sort=-version:refname | head -n 1)
+  if [ -n "$PREVIOUS_TAG" ]; then
+    NOTES=$(git log --pretty=format:'- %s' "$PREVIOUS_TAG..HEAD")
+    if [ -z "$NOTES" ]; then
+      NOTES="No commit messages since $PREVIOUS_TAG."
+    fi
+  else
+    NOTES=$(git log --pretty=format:'- %s' HEAD)
+    if [ -z "$NOTES" ]; then
+      NOTES="No commit messages found."
+    fi
+  fi
+  printf '%s\n' "$NOTES"
+}
+
+edit_release_notes() {
+  NOTES_FILE=$(mktemp "${TMPDIR:-/tmp}/aftertouch-release-notes.XXXXXX")
+  trap 'rm -f "$NOTES_FILE"' EXIT
+  printf '%s\n' "$NOTES" > "$NOTES_FILE"
+
+  RELEASE_EDITOR_COMMAND=${RELEASE_EDITOR:-${VISUAL:-${EDITOR:-vi}}}
+  printf 'Edit release notes in %s, then save and close the editor.\n' "$NOTES_FILE"
+  sh -c "$RELEASE_EDITOR_COMMAND \"\$1\"" release-notes-editor "$NOTES_FILE"
+
+  NOTES=$(sed '/^[[:space:]]*#/d' "$NOTES_FILE")
+  if [ -z "$(printf '%s' "$NOTES" | tr -d '[:space:]')" ]; then
+    echo "Release notes are empty; refusing to publish." >&2
+    exit 1
+  fi
 }
 
 bump_patch_version() {
@@ -133,10 +166,19 @@ if [ -n "$(git status --porcelain)" ]; then
   exit 1
 fi
 
+if [ -n "$RELEASE_NOTES" ]; then
+  NOTES="$RELEASE_NOTES"
+else
+  NOTES=$(proposed_release_notes)
+fi
+printf 'Proposed release notes for %s:\n%s\n' "$TAG" "$NOTES"
+edit_release_notes
+
+printf 'Final release notes for %s:\n%s\n' "$TAG" "$NOTES"
 git tag -a "$TAG" -m "Release $TAG"
 git push "$REMOTE" "$TAG"
 
-gh release create "$TAG" "$ARTIFACT" --title "$TAG" --notes "${RELEASE_NOTES:-Release $TAG}"
+gh release create "$TAG" "$ARTIFACT" --title "$TAG" --notes "$NOTES"
 
 NEXT_VERSION=$(bump_patch_version)
 git add package.json package-lock.json app.json

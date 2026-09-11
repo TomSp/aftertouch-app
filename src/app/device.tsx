@@ -344,8 +344,14 @@ export default function DeviceScreen() {
                     </View>
                 </View> : null}
                 <View style={styles.controls}>
+                    <Pressable accessibilityLabel="Previous track" disabled={busy || isStandby} onPress={() => void sendKey('PREV_TRACK')} style={StyleSheet.flatten([styles.button, (busy || isStandby) && styles.buttonDisabled])}>
+                        <Text style={StyleSheet.flatten([styles.buttonText, (busy || isStandby) && styles.buttonTextDisabled])}>⏮</Text>
+                    </Pressable>
                     <Pressable accessibilityLabel={isPlaying ? 'Pause' : 'Play'} disabled={busy || isStandby} onPress={() => void sendKey('PLAY_PAUSE')} style={StyleSheet.flatten([styles.button, (busy || isStandby) && styles.buttonDisabled])}>
                         <Text style={StyleSheet.flatten([styles.buttonText, (busy || isStandby) && styles.buttonTextDisabled])}>{isPlaying ? '⏸' : '▶'}</Text>
+                    </Pressable>
+                    <Pressable accessibilityLabel="Next track" disabled={busy || isStandby} onPress={() => void sendKey('NEXT_TRACK')} style={StyleSheet.flatten([styles.button, (busy || isStandby) && styles.buttonDisabled])}>
+                        <Text style={StyleSheet.flatten([styles.buttonText, (busy || isStandby) && styles.buttonTextDisabled])}>⏭</Text>
                     </Pressable>
                     <Pressable disabled={busy} onPress={() => void sendKey('POWER')} style={styles.button}>
                         <Text style={styles.buttonText}>{isStandby ? 'Power On' : 'Power Off'}</Text>

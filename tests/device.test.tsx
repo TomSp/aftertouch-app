@@ -81,7 +81,9 @@ describe('DeviceScreen API interactions', () => {
         await waitFor(() => expect(screen.getByText(/STANDBY/)).toBeTruthy());
         expect(screen.queryByText('Track: Not playing')).toBeNull();
         expect(screen.getByText('Power On')).toBeTruthy();
+        expect(screen.getByLabelText('Previous track')).toBeDisabled();
         expect(screen.getByLabelText('Play')).toBeDisabled();
+        expect(screen.getByLabelText('Next track')).toBeDisabled();
         expect(screen.getByText('25')).toBeTruthy();
         expect(screen.getByLabelText('Preset 1: 94.3 RS2')).toBeTruthy();
         expect(screen.getByTestId('preset-image-1').props.source).toEqual({uri: 'http://cdn-profiles.tunein.com/s25221/images/logoq.jpg?t=2'});
