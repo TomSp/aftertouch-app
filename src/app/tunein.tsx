@@ -33,8 +33,8 @@ type SearchResponse = {
                 subtitle?: string;
                 imageUrl?: string;
                 _links?: {
-                    bmx_playback?: {href?: string};
-                    bmx_navigate?: {href?: string};
+                    bmx_playback?: { href?: string };
+                    bmx_navigate?: { href?: string };
                 };
             }>;
         }>;
@@ -91,7 +91,7 @@ async function requestText(uri: string, options?: RequestInit) {
 export default function TuneInScreen() {
     const insets = useSafeAreaInsets();
     const router = useRouter();
-    const {ip_address, name} = useLocalSearchParams<{ip_address?: string | string[]; name?: string | string[]}>();
+    const {ip_address, name} = useLocalSearchParams<{ ip_address?: string | string[]; name?: string | string[] }>();
     const ipAddress = parameter(ip_address);
     const deviceName = parameter(name) || ipAddress || 'Device';
     const tuneInBaseUri = 'http://' + ipAddress + ':8000/api/control/providers/tunein';
@@ -149,7 +149,7 @@ export default function TuneInScreen() {
             const target = path
                 ? tuneInBaseUri + path
                 : tuneInBaseUri + '/navigate';
-            console.info('[Aftertouch] navigate target' + target);
+//            console.info('[Aftertouch] navigate target' + target);
             const result = await requestText(target);
             setBrowseBreadcrumbs(breadcrumbs);
             setBrowsePath(path);
@@ -168,8 +168,17 @@ export default function TuneInScreen() {
         setSelecting(true);
         setError(null);
         try {
-            const body = JSON.stringify({location: station.location, type: 'stationurl', name: station.name, containerArt: ''});
-            await requestText(tuneInDeviceBaseUri + '/play', {method: 'POST', headers: {'Content-Type': 'application/json'}, body});
+            const body = JSON.stringify({
+                location: station.location,
+                type: 'stationurl',
+                name: station.name,
+                containerArt: ''
+            });
+            await requestText(tuneInDeviceBaseUri + '/play', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body
+            });
             router.back();
         } catch (requestError) {
             setError(requestError instanceof Error ? requestError.message : 'Unable to select station.');
@@ -183,7 +192,8 @@ export default function TuneInScreen() {
             <Stack.Screen options={{
                 title: deviceName + ' TuneIn',
                 headerTitle: () => (
-                    <Pressable accessibilityLabel={'Back to ' + deviceName} accessibilityRole="button" onPress={() => router.back()} style={styles.headerTitle}>
+                    <Pressable accessibilityLabel={'Back to ' + deviceName} accessibilityRole="button"
+                               onPress={() => router.back()} style={styles.headerTitle}>
                         <Text numberOfLines={1} style={styles.headerTitleText}>{deviceName + ' TuneIn'}</Text>
                     </Pressable>
                 )
@@ -203,15 +213,19 @@ export default function TuneInScreen() {
                             style={styles.input}
                             value={query}
                         />
-                        <Pressable accessibilityLabel="Search TuneIn" disabled={loading || selecting || !ipAddress || !query.trim()} onPress={() => void search()} style={styles.searchButton}>
+                        <Pressable accessibilityLabel="Search TuneIn"
+                                   disabled={loading || selecting || !ipAddress || !query.trim()}
+                                   onPress={() => void search()} style={styles.searchButton}>
                             <Text style={styles.searchButtonText}>⌕</Text>
                         </Pressable>
-                        <Pressable accessibilityLabel="Browse TuneIn" disabled={loading || selecting || !ipAddress} onPress={() => void browse()} style={styles.browseButton}>
+                        <Pressable accessibilityLabel="Browse TuneIn" disabled={loading || selecting || !ipAddress}
+                                   onPress={() => void browse()} style={styles.browseButton}>
                             <Text style={styles.browseButtonText}>Browse</Text>
                         </Pressable>
                     </View>
                     {error ? <Text style={styles.error}>{error}</Text> : null}
-                    {!loading && !error && query.trim() && stations.length === 0 && browseItems.length === 0 ? <Text style={styles.message}>No stations found.</Text> : null}
+                    {!loading && !error && query.trim() && stations.length === 0 && browseItems.length === 0 ?
+                        <Text style={styles.message}>No stations found.</Text> : null}
                     {browseBreadcrumbs.length > 0 ? (
                         <ScrollView
                             horizontal
@@ -254,7 +268,8 @@ export default function TuneInScreen() {
                             onPress={() => void selectStation(station)}
                             style={styles.station}
                         >
-                            {station.image ? <Image accessibilityIgnoresInvertColors source={{uri: station.image}} style={styles.stationImage}/> : null}
+                            {station.image ? <Image accessibilityIgnoresInvertColors source={{uri: station.image}}
+                                                    style={styles.stationImage}/> : null}
                             <Text numberOfLines={2} style={styles.stationName}>{station.name}</Text>
                         </Pressable>
                     ))}
@@ -271,17 +286,57 @@ export default function TuneInScreen() {
 
 const styles = StyleSheet.create({
     safe: {flex: 1, backgroundColor: '#0b0b0b'},
-    loadingOverlay: {alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.55)', bottom: 0, justifyContent: 'center', left: 0, position: 'absolute', right: 0, top: 0},
+    loadingOverlay: {
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.55)',
+        bottom: 0,
+        justifyContent: 'center',
+        left: 0,
+        position: 'absolute',
+        right: 0,
+        top: 0
+    },
     container: {flexGrow: 1, padding: 24, gap: 12},
     headerTitle: {maxWidth: 220},
     headerTitleText: {color: '#f5f5f5', fontSize: 18, fontWeight: '600'},
     searchRow: {alignItems: 'center', flexDirection: 'row', gap: 8},
-    input: {borderColor: '#6b7280', borderRadius: 10, borderWidth: 1, color: '#ffffff', flex: 1, fontSize: 16, paddingHorizontal: 14, paddingVertical: 12},
-    searchButton: {alignItems: 'center', backgroundColor: '#ffffff', borderRadius: 10, height: 48, justifyContent: 'center', width: 52},
+    input: {
+        borderColor: '#6b7280',
+        borderRadius: 10,
+        borderWidth: 1,
+        color: '#ffffff',
+        flex: 1,
+        fontSize: 16,
+        paddingHorizontal: 14,
+        paddingVertical: 12
+    },
+    searchButton: {
+        alignItems: 'center',
+        backgroundColor: '#ffffff',
+        borderRadius: 10,
+        height: 48,
+        justifyContent: 'center',
+        width: 52
+    },
     searchButtonText: {color: '#111111', fontSize: 28, lineHeight: 32},
-    browseButton: {alignItems: 'center', backgroundColor: '#f87171', borderRadius: 10, height: 48, justifyContent: 'center', paddingHorizontal: 14},
+    browseButton: {
+        alignItems: 'center',
+        backgroundColor: '#f87171',
+        borderRadius: 10,
+        height: 48,
+        justifyContent: 'center',
+        paddingHorizontal: 14
+    },
     browseButtonText: {color: '#111111', fontSize: 15, fontWeight: '600'},
-    station: {alignItems: 'center', backgroundColor: '#1f2937', borderRadius: 12, flexDirection: 'row', gap: 14, minHeight: 72, padding: 12},
+    station: {
+        alignItems: 'center',
+        backgroundColor: '#1f2937',
+        borderRadius: 12,
+        flexDirection: 'row',
+        gap: 14,
+        minHeight: 72,
+        padding: 12
+    },
     stationImage: {backgroundColor: '#111827', borderRadius: 8, height: 48, width: 48},
     stationName: {color: '#ffffff', flex: 1, fontSize: 17},
     browseItem: {backgroundColor: '#1f2937', borderRadius: 12, gap: 4, padding: 16},

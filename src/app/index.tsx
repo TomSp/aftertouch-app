@@ -68,7 +68,7 @@ export default function HomeScreen() {
 
             try {
                 const devicesUri = storedSource + '/setup/devices';
-                console.info('[Aftertouch] Fetching devices from ' + devicesUri);
+//                console.info('[Aftertouch] Fetching devices from ' + devicesUri);
                 const response = await fetch(devicesUri);
                 if (!response.ok) {
                     setError('Request failed with status ' + response.status);
@@ -76,7 +76,7 @@ export default function HomeScreen() {
                 } else {
 
                     const payload: unknown = await response.json();
-                    console.info('[Aftertouch] Devices response from ' + devicesUri + ' returned HTTP ' + response.status);
+                    //                  console.info('[Aftertouch] Devices response from ' + devicesUri + ' returned HTTP ' + response.status);
                     if (mounted) {
                         setDevices(getDevices(payload));
                     }
