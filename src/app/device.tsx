@@ -88,6 +88,17 @@ function storedMusicDisplay(track: string, artist: string) {
     return {track: derivedTrack, artist: derivedArtist};
 }
 
+function statusChanged(previous: DeviceStatus | null, next: DeviceStatus | null) {
+    if (!previous || !next) {
+        return Boolean(next);
+    }
+
+    return previous.source !== next.source ||
+        previous.playStatus !== next.playStatus ||
+        previous.track !== next.track ||
+        previous.artist !== next.artist;
+}
+
 export default function DeviceScreen() {
     const insets = useSafeAreaInsets();
     const {ip_address, name} = useLocalSearchParams<{ip_address?: string | string[]; name?: string | string[]}>();
@@ -104,11 +115,11 @@ export default function DeviceScreen() {
     const volumeRef = useRef<VolumeStatus | null>(null);
     const nativeVolumeRef = useRef<number | null>(null);
 
-    async function loadStatus() {
+    async function loadStatus(): Promise<DeviceStatus | null> {
         if (!ipAddress) {
             setError('No device IP address was provided.');
             setLoading(false);
-            return;
+            return null;
         }
 
         setLoading(true);
@@ -120,12 +131,13 @@ export default function DeviceScreen() {
                 requestText(baseUri + '/presets')
             ]);
 //            console.info('[Aftertouch] Device status response from ' + baseUri);
-            setStatus({
+            const nextStatus = {
                 source: xmlAttribute(nowPlayingXml, 'nowPlaying', 'source') || 'Unknown',
                 playStatus: xmlTag(nowPlayingXml, 'playStatus') || '',
                 track: xmlTag(nowPlayingXml, 'track') || xmlTag(nowPlayingXml, 'trackTitle') || 'Not playing',
                 artist: xmlTag(nowPlayingXml, 'artist') || xmlTag(nowPlayingXml, 'artistName') || ''
-            });
+            };
+            setStatus(nextStatus);
 //            console.info('[Aftertouch] Device status' + status?.playStatus);
             const nextVolume = {
                 target: Number(xmlTag(volumeXml, 'targetvolume')) || 0,
@@ -135,8 +147,10 @@ export default function DeviceScreen() {
             volumeRef.current = nextVolume;
             setVolume(nextVolume);
             setPresets(parsePresets(presetsXml));
+            return nextStatus;
         } catch (requestError) {
             setError(requestError instanceof Error ? requestError.message : 'Unable to load device status.');
+            return null;
         } finally {
             setLoading(false);
         }
@@ -203,7 +217,18 @@ export default function DeviceScreen() {
         });
     }
 
+    async function reloadUntilStatusChanges(previousStatus: DeviceStatus | null) {
+        for (let attempt = 0; attempt < 10; attempt += 1) {
+            await wait(1000);
+            const nextStatus = await loadStatus();
+            if (statusChanged(previousStatus, nextStatus)) {
+                return;
+            }
+        }
+    }
+
     async function sendKey(key: string) {
+        const previousStatus = status;
         provideHapticFeedback();
         setBusy(true);
         setError(null);
@@ -211,8 +236,7 @@ export default function DeviceScreen() {
             const body = (state: string) => '<key state="' + state + '" sender="Gabbo">' + key + '</key>';
             await requestText(baseUri + '/key', {method: 'POST', headers: {'Content-Type': 'application/xml'}, body: body('press')});
             await requestText(baseUri + '/key', {method: 'POST', headers: {'Content-Type': 'application/xml'}, body: body('release')});
-            await wait(2000);
-            await loadStatus();
+            await reloadUntilStatusChanges(previousStatus);
         } catch (requestError) {
             setError(requestError instanceof Error ? requestError.message : 'Unable to control device.');
         } finally {
@@ -236,7 +260,6 @@ export default function DeviceScreen() {
                 body: '<volume>' + nextVolume + '</volume>'
             });
             if (reloadStatus) {
-                await wait(2000);
                 await loadStatus();
             }
         } catch (requestError) {

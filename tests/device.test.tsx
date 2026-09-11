@@ -7,6 +7,7 @@ import {SafeAreaProvider} from 'react-native-safe-area-context';
 import DeviceScreen from '../src/app/device';
 
 const nowPlayingXml = fs.readFileSync('test-data/now-playing.xml', 'utf8');
+const changedNowPlayingXml = '<nowPlaying deviceID="04A316EEB0B6" source="PLAYING"><playStatus>PLAY_STATE</playStatus><track>Changed track</track><artist>Changed artist</artist></nowPlaying>';
 const volumeXml = fs.readFileSync('test-data/volume.xml', 'utf8');
 const presetsXml = fs.readFileSync('test-data/presets.xml', 'utf8');
 const keyResponseXml = fs.readFileSync('test-data/key-response.xml', 'utf8');
@@ -51,13 +52,17 @@ function response(text: string) {
 }
 
 describe('DeviceScreen API interactions', () => {
+    let nowPlayingRequestCount = 0;
+
     beforeEach(() => {
         jest.clearAllMocks();
+        nowPlayingRequestCount = 0;
         Object.defineProperty(Platform, 'OS', {value: 'android'});
         (AsyncStorage.getItem as jest.Mock).mockResolvedValue(null);
         global.fetch = jest.fn().mockImplementation((uri: string, options?: RequestInit) => {
             if (uri.endsWith('/now_playing')) {
-                return Promise.resolve(response(nowPlayingXml));
+                nowPlayingRequestCount += 1;
+                return Promise.resolve(response(nowPlayingRequestCount > 1 ? changedNowPlayingXml : nowPlayingXml));
             }
             if (uri.endsWith('/volume') && !options) {
                 return Promise.resolve(response(volumeXml));
