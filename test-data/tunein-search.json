@@ -1,0 +1,290 @@
+{
+  "success": true,
+  "data": {
+    "_links": {
+      "self": {
+        "href": "/v1/search?q=94%2C3"
+      }
+    },
+    "bmx_sections": [
+      {
+        "_links": {
+          "self": {
+            "href": "/v1/search/sub/0?q=94%2C3"
+          }
+        },
+        "items": [
+          {
+            "_links": {
+              "bmx_playback": {
+                "href": "/v1/playback/station/a128828",
+                "type": "stationurl"
+              }
+            },
+            "imageUrl": "http://cdn-radiotime-logos.tunein.com/a0q.png",
+            "name": "94,3 RS2",
+            "subtitle": "Unrecognized type, may not play"
+          }
+        ],
+        "layout": "grid",
+        "name": "Browse"
+      },
+      {
+        "_links": {
+          "self": {
+            "href": "/v1/search/sub/1?q=94%2C3"
+          },
+          "bmx_next": {
+            "href": "/v1/search/next?cursor=aHR0cHM6Ly9hcGkucmFkaW90aW1lLmNvbS9wcm9maWxlcz9mdWxsdGV4dFNlYXJjaD10cnVlJmZpbHRlcj1zJnF1ZXJ5PTk0JTJjMyZ2ZXJzaW9uPTEuMyZpdGVtVG9rZW49QmdRRUFBSUFBZ0FBQUFBQUN3c0FBUVFUVlFBQUFCTlZBQUFB"
+          }
+        },
+        "items": [
+          {
+            "_links": {
+              "bmx_playback": {
+                "href": "/v1/playback/station/s25221",
+                "type": "stationurl"
+              }
+            },
+            "imageUrl": "http://cdn-profiles.tunein.com/s25221/images/logoq.png?t=638295792520000000",
+            "name": "94,3 RS2",
+            "subtitle": "94,3 RS2 am Nachmittag"
+          },
+          {
+            "_links": {
+              "bmx_playback": {
+                "href": "/v1/playback/station/s78293",
+                "type": "stationurl"
+              }
+            },
+            "imageUrl": "http://cdn-profiles.tunein.com/s78293/images/logoq.png?t=639219678790000000",
+            "name": "Radio 94,3",
+            "subtitle": "The Tim Kelly Show"
+          },
+          {
+            "_links": {
+              "bmx_playback": {
+                "href": "/v1/playback/station/s310426",
+                "type": "stationurl"
+              }
+            },
+            "imageUrl": "http://cdn-profiles.tunein.com/s310426/images/logoq.png?t=638514586340000000",
+            "name": "94,3 RS2 - BERLIN",
+            "subtitle": "94,3 RS2 – Was Berlin feiert, läuft hier."
+          },
+          {
+            "_links": {
+              "bmx_playback": {
+                "href": "/v1/playback/station/s310419",
+                "type": "stationurl"
+              }
+            },
+            "imageUrl": "http://cdn-profiles.tunein.com/s310419/images/logoq.png?t=638514584660000000",
+            "name": "94,3 RS2 - RELAX",
+            "subtitle": "94,3 RS2 – Dein Soundtrack zum Runterkommen."
+          },
+          {
+            "_links": {
+              "bmx_playback": {
+                "href": "/v1/playback/station/s310427",
+                "type": "stationurl"
+              }
+            },
+            "imageUrl": "http://cdn-profiles.tunein.com/s310427/images/logoq.png?t=638514586550000000",
+            "name": "94,3 RS2 - BRANDENBURG",
+            "subtitle": "94,3 RS2 – Zwischen Landstraße und Lieblingssong."
+          },
+          {
+            "_links": {
+              "bmx_playback": {
+                "href": "/v1/playback/station/s310415",
+                "type": "stationurl"
+              }
+            },
+            "imageUrl": "http://cdn-profiles.tunein.com/s310415/images/logoq.png?t=638514583730000000",
+            "name": "94,3 RS2 - 80ER",
+            "subtitle": "94,3 RS2 – Mehr Retro geht nicht. Die 80er in Dauerschleife."
+          },
+          {
+            "_links": {
+              "bmx_playback": {
+                "href": "/v1/playback/station/s155042",
+                "type": "stationurl"
+              }
+            },
+            "imageUrl": "http://cdn-profiles.tunein.com/s155042/images/logoq.png?t=638514584050000000",
+            "name": "94,3 RS2 - 90ER",
+            "subtitle": "94,3 RS2 – Die Hits aus dem Jahrzehnt zwischen Bravo-Poster und Boygroup-Hysterie."
+          },
+          {
+            "_links": {
+              "bmx_playback": {
+                "href": "/v1/playback/station/s310422",
+                "type": "stationurl"
+              }
+            },
+            "imageUrl": "http://cdn-profiles.tunein.com/s310422/images/logoq.png?t=638514585310000000",
+            "name": "94,3 RS2 - 2010ER",
+            "subtitle": "94,3 RS2 – 2010er: Party, Charts, Emotionen."
+          },
+          {
+            "_links": {
+              "bmx_playback": {
+                "href": "/v1/playback/station/s310412",
+                "type": "stationurl"
+              }
+            },
+            "imageUrl": "http://cdn-profiles.tunein.com/s310412/images/logoq.png?t=638514582800000000",
+            "name": "94,3 RS2 - 2000ER",
+            "subtitle": "94,3 RS2 – Die 2000er: laut, legendär und voller Ohrwürmer."
+          },
+          {
+            "_links": {
+              "bmx_playback": {
+                "href": "/v1/playback/station/s310417",
+                "type": "stationurl"
+              }
+            },
+            "imageUrl": "http://cdn-profiles.tunein.com/s310417/images/logoq.png?t=638514584250000000",
+            "name": "94,3 RS2 - AKTUELLE HITS",
+            "subtitle": "94,3 RS2 – Charts. Trends. Ohrwürmer. Nonstop."
+          }
+        ],
+        "layout": "grid",
+        "name": "Stations"
+      },
+      {
+        "_links": {
+          "self": {
+            "href": "/v1/search/sub/2?q=94%2C3"
+          }
+        },
+        "items": [
+          {
+            "_links": {
+              "bmx_navigate": {
+                "href": "/v1/navigate/profiles/aHR0cHM6Ly9hcGkucmFkaW90aW1lLmNvbS9wcm9maWxlcy9wMzQ2NjI5P3ZlcnNpb249MS4zJml0ZW1Ub2tlbj1CZ1FFQUFFQUFRQURBQU1BREF3QUFRUVRWZ0FBQUJOV0FBQUE"
+              },
+              "bmx_playback": {
+                "href": "/v1/playback/episodes/p346629?encoded_name=OTQsMyBSUzIgYW0gTmFjaG1pdHRhZw",
+                "type": "tracklisturl"
+              }
+            },
+            "imageUrl": "http://cdn-profiles.tunein.com/s25221/images/logoq.png?t=4",
+            "name": "94,3 RS2 am Nachmittag",
+            "subtitle": "Die Show mit Patty \u0026 Volker! Jede Menge Spaß und gute Laune mit unserem Feierabend-Dreamteam. Mit allem, was heute in Berlin und Brandenburg wichtig war, viel Action und spannenden Aktionen."
+          },
+          {
+            "_links": {
+              "bmx_navigate": {
+                "href": "/v1/navigate/profiles/aHR0cHM6Ly9hcGkucmFkaW90aW1lLmNvbS9wcm9maWxlcy9wMTg1NzM0NT92ZXJzaW9uPTEuMyZpdGVtVG9rZW49QmdRRUFBSUFBZ0FEQUFNQURBd0FBUVFUVmdBQUFCTldBQUFB"
+              },
+              "bmx_playback": {
+                "href": "/v1/playback/episodes/p1857345?encoded_name=Sm92ZW0gUGFuIFNhbyBKb3NlIGRvcyBDYW1wb3M",
+                "type": "tracklisturl"
+              }
+            },
+            "imageUrl": "http://cdn-profiles.tunein.com/p1857345/images/logoq.png?t=638525724900000000",
+            "name": "Jovem Pan Sao Jose dos Campos",
+            "subtitle": "159 Favorites"
+          },
+          {
+            "_links": {
+              "bmx_navigate": {
+                "href": "/v1/navigate/profiles/aHR0cHM6Ly9hcGkucmFkaW90aW1lLmNvbS9wcm9maWxlcy9wMTIyMDA4ND92ZXJzaW9uPTEuMyZpdGVtVG9rZW49QmdRRUFBTUFBd0FEQUFNQURBd0FBUVFUVmdBQUFCTldBQUFB"
+              },
+              "bmx_playback": {
+                "href": "/v1/playback/episodes/p1220084?encoded_name=TGEgcml2aWVyZQ",
+                "type": "tracklisturl"
+              }
+            },
+            "imageUrl": "http://cdn-profiles.tunein.com/p1220084/images/logoq.png?t=638543517950000000",
+            "name": "La riviere",
+            "subtitle": "La Rivière, c'est votre rendez-vous hebdomadaire en matière de musiques expérimentales en tout genres sur les ondes de CHOQ.ca et du CHYZ 94,3 FM."
+          },
+          {
+            "_links": {
+              "bmx_navigate": {
+                "href": "/v1/navigate/profiles/aHR0cHM6Ly9hcGkucmFkaW90aW1lLmNvbS9wcm9maWxlcy9wMjIwMDI5Nj92ZXJzaW9uPTEuMyZpdGVtVG9rZW49QmdRRUFBUUFCQUFEQUFNQURBd0FBUVFUVmdBQUFCTldBQUFB"
+              },
+              "bmx_playback": {
+                "href": "/v1/playback/episodes/p2200296?encoded_name=Qk5ld3MgQWdvcmE",
+                "type": "tracklisturl"
+              }
+            },
+            "imageUrl": "http://cdn-profiles.tunein.com/p2200296/images/logoq.png?t=638820822540000000",
+            "name": "BNews Agora",
+            "subtitle": "0 Favorites"
+          },
+          {
+            "_links": {
+              "bmx_navigate": {
+                "href": "/v1/navigate/profiles/aHR0cHM6Ly9hcGkucmFkaW90aW1lLmNvbS9wcm9maWxlcy9wMTk4ODY4NT92ZXJzaW9uPTEuMyZpdGVtVG9rZW49QmdRRUFBVUFCUUFEQUFNQURBd0FBUVFUVmdBQUFCTldBQUFB"
+              },
+              "bmx_playback": {
+                "href": "/v1/playback/episodes/p1988685?encoded_name=Um91Z2UgZXQgT3I",
+                "type": "tracklisturl"
+              }
+            },
+            "imageUrl": "http://cdn-radiotime-logos.tunein.com/s0q.png",
+            "name": "Rouge et Or",
+            "subtitle": "1 Favorite"
+          },
+          {
+            "_links": {
+              "bmx_navigate": {
+                "href": "/v1/navigate/profiles/aHR0cHM6Ly9hcGkucmFkaW90aW1lLmNvbS9wcm9maWxlcy9wMzE0MzQ5Mj92ZXJzaW9uPTEuMyZpdGVtVG9rZW49QmdRRUFBWUFCZ0FEQUFNQURBd0FBUVFUVmdBQUFCTldBQUFB"
+              },
+              "bmx_playback": {
+                "href": "/v1/playback/episodes/p3143492?encoded_name=QWhsbGV4",
+                "type": "tracklisturl"
+              }
+            },
+            "imageUrl": "http://cdn-profiles.tunein.com/p3143492/images/logoq.png?t=638095400240000000",
+            "name": "Ahllex",
+            "subtitle": "0 Favorites"
+          },
+          {
+            "_links": {
+              "bmx_navigate": {
+                "href": "/v1/navigate/profiles/aHR0cHM6Ly9hcGkucmFkaW90aW1lLmNvbS9wcm9maWxlcy9wMzE4MzU5Nj92ZXJzaW9uPTEuMyZpdGVtVG9rZW49QmdRRUFBY0FCd0FEQUFNQURBd0FBUVFUVmdBQUFCTldBQUFB"
+              },
+              "bmx_playback": {
+                "href": "/v1/playback/episodes/p3183596?encoded_name=QWxkZWlhIEdsb2JhbCAqIEdsb2JhbCBWaWxsYWdlIEJyYXppbCAqIFJhZGlvIFVuaXZlcnNpdGFyaWEgQ2VzdW1hcg",
+                "type": "tracklisturl"
+              }
+            },
+            "imageUrl": "http://cdn-profiles.tunein.com/p3183596/images/logoq.png?t=638280167690000000",
+            "name": "Aldeia Global * Global Village Brazil * Radio Universitaria Cesumar",
+            "subtitle": "Bem-vindos à casa de todos os povos e de todas as raças em comunhão através da música! Esse é um dos poucos \"lugares\" da Terra onde árabe palestino convive harmoniosamente com israelense judeu, onde gregos e turcos não divergem em nada, onde ingleses..."
+          }
+        ],
+        "layout": "grid",
+        "name": "Shows"
+      },
+      {
+        "_links": {
+          "self": {
+            "href": "/v1/search/sub/3?q=94%2C3"
+          }
+        },
+        "items": [
+          {
+            "_links": {
+              "bmx_playback": {
+                "href": "/v1/playback/station/t561027031",
+                "type": "stationurl"
+              }
+            },
+            "imageUrl": "http://cdn-profiles.tunein.com/p4699071/images/logoq.png?t=2",
+            "name": "FM do Povo lança promoção e vai sortear agasalho oficial da Seleção Brasileira; saiba como participar",
+            "subtitle": "News \u003e"
+          }
+        ],
+        "layout": "grid",
+        "name": "Episodes"
+      }
+    ],
+    "layout": "classic"
+  }
+}

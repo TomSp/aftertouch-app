@@ -19,6 +19,7 @@ Expo-based Android app for discovering and controlling Aftertouch devices.
 - `src/app/settings.tsx`: settings screen reachable from the gear icon and header navigation, with source and haptic-feedback settings
 - `src/app/details.tsx`: sample secondary screen
 - `src/app/device.tsx`: device status and control screen
+- `src/app/tunein.tsx`: TuneIn radio search and station-selection screen
 - `src/app/_layout.tsx`: shared navigation, status bar setup, safe-area provider, and header styling
 - `src/app/+not-found.tsx`: fallback route with home navigation
 
@@ -27,6 +28,7 @@ Expo-based Android app for discovering and controlling Aftertouch devices.
 - Home is reachable at `/`.
 - Settings is reachable at `/settings`.
 - A device card opens `/device` with the device name and IP address.
+- The TuneIn button on `/device` opens `/tunein` with the selected device name and IP address.
 - The home screen exposes settings through a conventional gear icon in the top-right corner.
 - The shared header shows `assets/icon.png` on the left side.
 - The header-left app icon is clickable and navigates to `/`.
@@ -75,7 +77,7 @@ The settings screen also provides a `Haptic feedback` on/off switch. Its state i
 ### Presets API
 
 - Read configured presets with `GET http://<ip_address>:8090/presets`.
-- Parse the XML response and display each preset as a button in a 3-column by 2-row block between Status and Volume on the device page.
+- Parse the XML response and display each preset as a button in a 3-column by 2-row block in the Play section between Status and Volume on the device page.
 - Use `containerArt` as the button image; when it is empty, display the lowercased `itemName` instead.
 - Selecting a preset sends the corresponding `PRESET_<id>` key command.
 
@@ -90,13 +92,20 @@ The settings screen also provides a `Haptic feedback` on/off switch. Its state i
 - Each key action sends XML `press` and `release` requests with sender `Gabbo`.
 - The device page currently supports `PLAY_PAUSE` and `POWER`.
 
+### TuneIn
+
+The device screen exposes a TuneIn button in the Play presets area. It opens a TuneIn screen that uses the targeted device IP on port `8000` as the base for `/api/control/providers/tunein`. Search requests use `/search?q=...`; the Browse button uses `/navigate`.
+
+Browse results with a `_links.bmx_navigate.href` are selectable. Pressing one appends the cleaned URI path to `/navigate` for the next browse request. The `/v1` prefix is removed from navigation paths when responses are read. Browse responses may contain further browse targets and station results; both are displayed, and stations can be selected for playback on the device. At every non-root browse level, clickable breadcrumbs are shown before the results and reload the selected ancestor level.
+
+The search and navigation fixtures are stored in `test-data/tunein-search.json` and `test-data/tunein-navigate.json`.
 
 ## Testing
 
 - Home device loading is covered by `tests/index.test.tsx`.
 - The test uses `test-data/setup-devices.json` as the mocked `GET /setup/devices` response.
 - Dedicated device API fixtures are stored in `test-data/now-playing.xml`, `test-data/volume.xml`, `test-data/presets.xml`, and `test-data/key-response.xml`.
-- The device API fixtures represent the `/now_playing`, `/volume`, and `/presets` responses, plus the documented `/key` success response.
+- The device API fixtures represent the `/now_playing`, `/volume`, and `/presets` responses, plus the documented `/key` success response. TuneIn fixtures are stored in `test-data/tunein-search.json` and `test-data/tunein-navigate.json`.
 - It verifies that only fixture devices with a non-empty `device_serial_number` are rendered with their `name` and `ip_address`, and that the configured API URI is requested.
 - Run the test suite with `npm test -- --runInBand`.
 

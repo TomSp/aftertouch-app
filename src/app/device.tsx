@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Haptics from 'expo-haptics';
 import Slider from '@react-native-community/slider';
 import {VolumeManager} from 'react-native-volume-manager';
-import {Stack, useLocalSearchParams} from 'expo-router';
+import {Link, Stack, useLocalSearchParams} from 'expo-router';
 import {useEffect, useRef, useState} from 'react';
 import {Image, Platform, Pressable, ScrollView, StyleSheet, Text, View} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
@@ -291,7 +291,7 @@ export default function DeviceScreen() {
     return (
         <>
             <Stack.Screen options={{title: deviceName}}/>
-            <View style={StyleSheet.flatten([styles.safe, {paddingTop: insets.top, paddingBottom: insets.bottom}])}>
+            <View style={StyleSheet.flatten([styles.safe, {paddingBottom: insets.bottom}])}>
             <ScrollView contentContainerStyle={styles.container}>
                 {error ? <Text style={styles.error}>{error}</Text> : null}
                 {status ? <View style={styles.card}>
@@ -316,7 +316,7 @@ export default function DeviceScreen() {
                     <Text numberOfLines={1} ellipsizeMode="tail" style={styles.value}>{tertiaryValue ? 'Artist: ' + tertiaryValue : ''}</Text>
                 </View> : null}
                 <View style={styles.card}>
-                    <Text style={styles.sectionTitle}>Presets</Text>
+                    <Text style={styles.sectionTitle}>Play</Text>
                     {presets.length > 0 ? <View style={styles.presetGrid}>
                         {presets.map((preset) => (
                             <Pressable
@@ -334,6 +334,14 @@ export default function DeviceScreen() {
                             </Pressable>
                         ))}
                     </View> : <Text style={styles.message}>No configured presets.</Text>}
+                    <Link
+                        href={('/tunein?ip_address=' + encodeURIComponent(ipAddress) + '&name=' + encodeURIComponent(deviceName)) as never}
+                        asChild
+                    >
+                        <Pressable accessibilityLabel="TuneIn" disabled={busy} style={styles.button}>
+                            <Text style={styles.buttonText}>TuneIn</Text>
+                        </Pressable>
+                    </Link>
                 </View>
                 {volume ? <View style={styles.card}>
                     <View style={styles.volumeHeader}>

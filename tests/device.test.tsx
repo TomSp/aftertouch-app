@@ -35,6 +35,7 @@ jest.mock('react-native-volume-manager', () => ({
 }));
 
 jest.mock('expo-router', () => ({
+    Link: ({children}: {children: React.ReactNode}) => children,
     Stack: {Screen: () => null},
     useLocalSearchParams: () => ({ip_address: '192.168.1.187', name: 'EZ SoundTouch'})
 }));
@@ -89,6 +90,7 @@ describe('DeviceScreen API interactions', () => {
         expect(screen.getByLabelText('Previous track')).toBeDisabled();
         expect(screen.getByLabelText('Play')).toBeDisabled();
         expect(screen.getByLabelText('Next track')).toBeDisabled();
+        expect(screen.getByLabelText('TuneIn')).toBeTruthy();
         expect(screen.getByText('25')).toBeTruthy();
         expect(screen.getByLabelText('Preset 1: 94.3 RS2')).toBeTruthy();
         expect(screen.getByTestId('preset-image-1').props.source).toEqual({uri: 'http://cdn-profiles.tunein.com/s25221/images/logoq.jpg?t=2'});

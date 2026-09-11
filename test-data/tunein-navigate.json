@@ -1,0 +1,87 @@
+{
+  "success": true,
+  "data": {
+    "_links": {
+      "self": {
+        "href": "/v1/navigate"
+      },
+      "bmx_search": {
+        "href": "/v1/search?q={query}",
+        "filters": [],
+        "templated": true
+      }
+    },
+    "bmx_sections": [
+      {
+        "items": [
+          {
+            "_links": {
+              "bmx_navigate": {
+                "href": "/v1/navigate/aHR0cDovL29wbWwucmFkaW90aW1lLmNvbS9Ccm93c2UuYXNoeD9jPWxvY2FsJnJlbmRlcj1qc29u"
+              }
+            },
+            "name": "Local Radio",
+            "subtitle": ""
+          },
+          {
+            "_links": {
+              "bmx_navigate": {
+                "href": "/v1/navigate/aHR0cDovL29wbWwucmFkaW90aW1lLmNvbS9Ccm93c2UuYXNoeD9jPW11c2ljJnJlbmRlcj1qc29u"
+              }
+            },
+            "name": "Music",
+            "subtitle": ""
+          },
+          {
+            "_links": {
+              "bmx_navigate": {
+                "href": "/v1/navigate/aHR0cDovL29wbWwucmFkaW90aW1lLmNvbS9Ccm93c2UuYXNoeD9jPXRhbGsmcmVuZGVyPWpzb24"
+              }
+            },
+            "name": "Talk",
+            "subtitle": ""
+          },
+          {
+            "_links": {
+              "bmx_navigate": {
+                "href": "/v1/navigate/aHR0cDovL29wbWwucmFkaW90aW1lLmNvbS9Ccm93c2UuYXNoeD9jPXNwb3J0cyZyZW5kZXI9anNvbg"
+              }
+            },
+            "name": "Sports",
+            "subtitle": ""
+          },
+          {
+            "_links": {
+              "bmx_navigate": {
+                "href": "/v1/navigate/aHR0cDovL29wbWwucmFkaW90aW1lLmNvbS9Ccm93c2UuYXNoeD9pZD1yMCZyZW5kZXI9anNvbg"
+              }
+            },
+            "name": "By Location",
+            "subtitle": ""
+          },
+          {
+            "_links": {
+              "bmx_navigate": {
+                "href": "/v1/navigate/aHR0cDovL29wbWwucmFkaW90aW1lLmNvbS9Ccm93c2UuYXNoeD9jPWxhbmcmcmVuZGVyPWpzb24"
+              }
+            },
+            "name": "By Language",
+            "subtitle": ""
+          },
+          {
+            "_links": {
+              "bmx_navigate": {
+                "href": "/v1/navigate/aHR0cDovL29wbWwucmFkaW90aW1lLmNvbS9Ccm93c2UuYXNoeD9jPXBvZGNhc3QmcmVuZGVyPWpzb24"
+              }
+            },
+            "name": "Podcasts",
+            "subtitle": ""
+          }
+        ],
+        "layout": "list",
+        "name": ""
+      }
+    ],
+    "layout": "classic"
+  }
+}
