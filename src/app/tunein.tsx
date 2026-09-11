@@ -180,7 +180,14 @@ export default function TuneInScreen() {
 
     return (
         <>
-            <Stack.Screen options={{title: deviceName + ' TuneIn'}}/>
+            <Stack.Screen options={{
+                title: deviceName + ' TuneIn',
+                headerTitle: () => (
+                    <Pressable accessibilityLabel={'Back to ' + deviceName} accessibilityRole="button" onPress={() => router.back()} style={styles.headerTitle}>
+                        <Text numberOfLines={1} style={styles.headerTitleText}>{deviceName + ' TuneIn'}</Text>
+                    </Pressable>
+                )
+            }}/>
             <View style={StyleSheet.flatten([styles.safe, {paddingBottom: insets.bottom}])}>
                 <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
                     <View style={styles.searchRow}>
@@ -266,6 +273,8 @@ const styles = StyleSheet.create({
     safe: {flex: 1, backgroundColor: '#0b0b0b'},
     loadingOverlay: {alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.55)', bottom: 0, justifyContent: 'center', left: 0, position: 'absolute', right: 0, top: 0},
     container: {flexGrow: 1, padding: 24, gap: 12},
+    headerTitle: {maxWidth: 220},
+    headerTitleText: {color: '#f5f5f5', fontSize: 18, fontWeight: '600'},
     searchRow: {alignItems: 'center', flexDirection: 'row', gap: 8},
     input: {borderColor: '#6b7280', borderRadius: 10, borderWidth: 1, color: '#ffffff', flex: 1, fontSize: 16, paddingHorizontal: 14, paddingVertical: 12},
     searchButton: {alignItems: 'center', backgroundColor: '#ffffff', borderRadius: 10, height: 48, justifyContent: 'center', width: 52},

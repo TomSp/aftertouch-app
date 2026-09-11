@@ -8,7 +8,7 @@ const browseResponse = fs.readFileSync('test-data/tunein-navigate.json', 'utf8')
 const mockBack = jest.fn();
 
 jest.mock('expo-router', () => ({
-    Stack: {Screen: () => null},
+    Stack: {Screen: ({options}: {options?: {headerTitle?: () => React.ReactNode}}) => options?.headerTitle?.() ?? null},
     useLocalSearchParams: () => ({ip_address: '192.168.1.187', name: 'EZ SoundTouch'}),
     useRouter: () => ({back: mockBack})
 }));
@@ -32,6 +32,18 @@ describe('TuneInScreen', () => {
 
         await waitFor(() => expect(screen.getAllByLabelText('Select 94,3 RS2').length).toBeGreaterThan(0));
         expect(global.fetch).toHaveBeenCalledWith('http://192.168.1.187:8000/api/control/providers/tunein/search?q=94%2C3', undefined);
+    });
+
+    it('returns to the device screen from the header title', () => {
+        const screen = render(
+            <SafeAreaProvider initialMetrics={{frame: {x: 0, y: 0, width: 320, height: 640}, insets: {top: 0, right: 0, bottom: 0, left: 0}}}>
+                <TuneInScreen/>
+            </SafeAreaProvider>
+        );
+
+        fireEvent.press(screen.getByLabelText('Back to EZ SoundTouch'));
+
+        expect(mockBack).toHaveBeenCalled();
     });
 
     it('selects a station on the device and returns to the device screen', async () => {
