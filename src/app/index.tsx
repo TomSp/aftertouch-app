@@ -126,7 +126,7 @@ export default function HomeScreen() {
                 ) : null}
                 {devices.map((device, index) => {
                     const name = deviceValue(device, ['name', 'device_name', 'deviceName', 'label']) ?? 'Device ' + (index + 1);
-                    const address = deviceValue(device, ['ip_address', 'ip_adresse', 'ip', 'host', 'address', 'mac']);
+                    const address = deviceValue(device, ['ip_address', 'ip', 'host', 'address', 'mac']);
                     const id = deviceValue(device, ['id', 'deviceId', 'serialNumber']);
 
                     return (
