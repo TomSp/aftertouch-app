@@ -3,7 +3,7 @@
     "name": "Aftertouch",
     "slug": "aftertouch-app",
     "scheme": "aftertouch",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",
     "splash": {
