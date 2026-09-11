@@ -53,7 +53,10 @@
   "overrides": {
     "decode-uri-component": "^0.5.0",
     "uuid": "^14.0.2",
-    "react-native-worklets": "0.12.2"
+    "react-native-worklets": "0.12.2",
+    "glob": "^13.0.6",
+    "test-exclude": "^8.0.0",
+    "jsdom": "^28.1.0"
   },
   "jest": {
     "preset": "jest-expo",
