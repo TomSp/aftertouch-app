@@ -2,23 +2,31 @@
 set -eu
 
 ROOT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
-MODE="${1:-apk}"
+MODE="${RELEASE_MODE:-apk}"
+BUMP="${RELEASE_BUMP:-patch}"
 REMOTE="${GIT_REMOTE:-origin}"
 BRANCH="${GIT_BRANCH:-}"
 RELEASE_NOTES="${RELEASE_NOTES:-}"
 
 usage() {
   cat >&2 <<EOF
-Usage: $0 [apk|aab]
+Usage: $0 [options] [apk|aab] [patch|minor]
 
 Builds the current version, tags it, publishes a GitHub release with the built artifact,
-then bumps the patch version and pushes that bump commit.
+then bumps the version and pushes that bump commit.
+
+Options:
+  --patch         Bump patch version (default, e.g. 1.2.3 -> 1.2.4).
+  --minor         Bump minor version and reset patch to zero (e.g. 1.2.3 -> 1.3.0).
+  --bump TYPE     Set bump type to 'patch' or 'minor'.
+  -h, --help      Show this help.
 
 Environment:
   GIT_REMOTE      Git remote to push to. Defaults to origin.
   GIT_BRANCH      Branch to push the version bump to. Defaults to current branch.
   RELEASE_NOTES   Optional initial release notes text. Defaults to commit messages since the latest v* tag.
   RELEASE_EDITOR  Editor command for release notes. Defaults to VISUAL, EDITOR, or vi.
+  RELEASE_BUMP    Version bump type ('patch' or 'minor'). Defaults to patch.
 EOF
 }
 
@@ -65,16 +73,29 @@ edit_release_notes() {
   fi
 }
 
-bump_patch_version() {
-  node <<'NODE'
+bump_version() {
+  node - "$1" <<'NODE'
 const fs = require('fs');
 
-function bump(version) {
+const bumpType = process.argv[2] || 'patch';
+
+function bump(version, type) {
   const match = version.match(/^(\d+)\.(\d+)\.(\d+)(.*)$/);
   if (!match) {
     throw new Error('Unsupported version format: ' + version);
   }
-  return `${match[1]}.${match[2]}.${Number(match[3]) + 1}${match[4]}`;
+  const major = match[1];
+  const minor = Number(match[2]);
+  const patch = Number(match[3]);
+  const extra = match[4];
+
+  if (type === 'minor') {
+    return `${major}.${minor + 1}.0${extra}`;
+  }
+  if (type === 'patch') {
+    return `${major}.${minor}.${patch + 1}${extra}`;
+  }
+  throw new Error('Unsupported bump type: ' + type);
 }
 
 const packageJson = JSON.parse(fs.readFileSync('package.json', 'utf8'));
@@ -85,7 +106,7 @@ if (packageJson.version !== appJson.expo.version) {
   throw new Error(`package.json version (${packageJson.version}) does not match app.json expo.version (${appJson.expo.version})`);
 }
 
-const nextVersion = bump(packageJson.version);
+const nextVersion = bump(packageJson.version, bumpType);
 packageJson.version = nextVersion;
 appJson.expo.version = nextVersion;
 packageLock.version = nextVersion;
@@ -100,14 +121,62 @@ console.log(nextVersion);
 NODE
 }
 
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    apk|aab)
+      MODE="$1"
+      ;;
+    patch|minor)
+      BUMP="$1"
+      ;;
+    --patch)
+      BUMP="patch"
+      ;;
+    --minor)
+      BUMP="minor"
+      ;;
+    --bump)
+      if [ "$#" -lt 2 ]; then
+        echo "--bump requires a type (patch|minor)." >&2
+        exit 1
+      fi
+      BUMP="$2"
+      shift
+      ;;
+    --bump=*)
+      BUMP="${1#*=}"
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    -*)
+      echo "Unknown option: $1" >&2
+      usage
+      exit 1
+      ;;
+    *)
+      echo "Unknown argument: $1" >&2
+      usage
+      exit 1
+      ;;
+  esac
+  shift
+done
+
 case "$MODE" in
   apk|aab) ;;
-  -h|--help)
-    usage
-    exit 0
-    ;;
   *)
     echo "Unknown release artifact mode: $MODE" >&2
+    usage
+    exit 1
+    ;;
+esac
+
+case "$BUMP" in
+  patch|minor) ;;
+  *)
+    echo "Unknown version bump type: $BUMP (expected 'patch' or 'minor')" >&2
     usage
     exit 1
     ;;
@@ -180,7 +249,7 @@ git push "$REMOTE" "$TAG"
 
 gh release create "$TAG" "$ARTIFACT" --title "$TAG" --notes "$NOTES"
 
-NEXT_VERSION=$(bump_patch_version)
+NEXT_VERSION=$(bump_version "$BUMP")
 git add package.json package-lock.json app.json
 git commit -m "Bump version to $NEXT_VERSION"
 git push "$REMOTE" "$BRANCH"
