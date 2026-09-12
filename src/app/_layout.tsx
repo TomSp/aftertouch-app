@@ -28,6 +28,7 @@ export default function RootLayout() {
                 <Stack.Screen name="settings" options={{title: 'Settings'}}/>
                 <Stack.Screen name="device" options={{title: 'Device'}}/>
                 <Stack.Screen name="tunein" options={{title: 'TuneIn'}}/>
+                <Stack.Screen name="library" options={{title: 'Library'}}/>
             </Stack>
         </SafeAreaProvider>
     );
