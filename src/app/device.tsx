@@ -286,8 +286,8 @@ export default function DeviceScreen() {
     return (
         <>
             <Stack.Screen options={{title: deviceName}}/>
-            <View style={StyleSheet.flatten([styles.safe, {paddingBottom: insets.bottom}])}>
-            <ScrollView contentContainerStyle={styles.container}>
+            <View style={styles.safe}>
+                <ScrollView contentContainerStyle={[styles.container, {paddingBottom: 24 + insets.bottom}]}>
                 {error ? <Text style={styles.error}>{error}</Text> : null}
                 {status ? <View style={styles.card}>
                     <View style={styles.statusHeader}>
@@ -383,7 +383,7 @@ export default function DeviceScreen() {
                         <Text style={styles.buttonText}>{isStandby ? 'Power On' : 'Power Off'}</Text>
                     </Pressable>
                 </View>
-            </ScrollView>
+                </ScrollView>
             </View>
         </>
     );
