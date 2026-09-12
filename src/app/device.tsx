@@ -108,7 +108,6 @@ export default function DeviceScreen() {
     const [status, setStatus] = useState<DeviceStatus | null>(null);
     const [volume, setVolume] = useState<VolumeStatus | null>(null);
     const [presets, setPresets] = useState<Preset[]>([]);
-    const [loading, setLoading] = useState(true);
     const [busy, setBusy] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [hapticsEnabled, setHapticsEnabled] = useState(false);
@@ -118,11 +117,9 @@ export default function DeviceScreen() {
     async function loadStatus(): Promise<DeviceStatus | null> {
         if (!ipAddress) {
             setError('No device IP address was provided.');
-            setLoading(false);
             return null;
         }
 
-        setLoading(true);
         setError(null);
         try {
             const [nowPlayingXml, volumeXml, presetsXml] = await Promise.all([
@@ -151,8 +148,6 @@ export default function DeviceScreen() {
         } catch (requestError) {
             setError(requestError instanceof Error ? requestError.message : 'Unable to load device status.');
             return null;
-        } finally {
-            setLoading(false);
         }
     }
 

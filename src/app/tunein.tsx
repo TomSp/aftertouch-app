@@ -105,7 +105,6 @@ export default function TuneInScreen() {
     const [browseItems, setBrowseItems] = useState<BrowseItem[]>([]);
     const [browseBreadcrumbs, setBrowseBreadcrumbs] = useState<BrowseBreadcrumb[]>([]);
     const [browsePath, setBrowsePath] = useState('');
-    const [browseName, setBrowseName] = useState('TuneIn');
     const breadcrumbScrollRef = useRef<ScrollView>(null);
     const [loading, setLoading] = useState(false);
     const [selecting, setSelecting] = useState(false);
@@ -147,7 +146,6 @@ export default function TuneInScreen() {
             setBrowseItems([]);
             setBrowseBreadcrumbs([]);
             setBrowsePath('');
-            setBrowseName('TuneIn');
             setStations(parseStations(result));
         } catch (requestError) {
             setStations([]);
@@ -173,7 +171,6 @@ export default function TuneInScreen() {
             const result = await requestText(target);
             setBrowseBreadcrumbs(breadcrumbs);
             setBrowsePath(path);
-            setBrowseName(name);
             setBrowseItems(parseBrowseItems(result));
             setStations(parseStations(result));
         } catch (requestError) {
