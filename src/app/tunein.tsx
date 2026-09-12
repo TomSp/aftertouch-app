@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {Stack, useLocalSearchParams, useRouter} from 'expo-router';
 import {useEffect, useRef, useState} from 'react';
-import {ActivityIndicator, Image, Pressable, ScrollView, StyleSheet, Text, TextInput, View} from 'react-native';
+import {ActivityIndicator, Image, Keyboard, Pressable, ScrollView, StyleSheet, Text, TextInput, View} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 type Station = {
@@ -200,6 +200,7 @@ export default function TuneInScreen() {
                 headers: {'Content-Type': 'application/json'},
                 body
             });
+            Keyboard.dismiss();
             router.back();
         } catch (requestError) {
             setError(requestError instanceof Error ? requestError.message : 'Unable to select station.');

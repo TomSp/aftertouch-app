@@ -1,12 +1,14 @@
 import fs from 'node:fs';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {fireEvent, render, waitFor} from '@testing-library/react-native';
+import {Keyboard} from 'react-native';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import TuneInScreen from '../src/app/tunein';
 
 const searchResponse = fs.readFileSync('test-data/tunein-search.json', 'utf8');
 const browseResponse = fs.readFileSync('test-data/tunein-navigate.json', 'utf8');
 const mockBack = jest.fn();
+const keyboardDismissSpy = jest.spyOn(Keyboard, 'dismiss').mockImplementation(jest.fn());
 
 jest.mock('@react-native-async-storage/async-storage', () => ({
     getItem: jest.fn().mockResolvedValue('http://azsound.home.spengler.berlin:8000'),
@@ -68,6 +70,7 @@ describe('TuneInScreen', () => {
         fireEvent.press(station[0]);
 
         await waitFor(() => expect(mockBack).toHaveBeenCalled());
+        expect(keyboardDismissSpy).toHaveBeenCalled();
         expect(global.fetch).toHaveBeenCalledWith('http://azsound.home.spengler.berlin:8000/api/control/devices/192.168.1.187/providers/tunein/play', expect.objectContaining({
             method: 'POST',
             headers: {'Content-Type': 'application/json'},

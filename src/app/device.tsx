@@ -292,17 +292,7 @@ export default function DeviceScreen() {
                 {status ? <View style={styles.card}>
                     <View style={styles.statusHeader}>
                         <Text style={styles.sectionTitle}>Status</Text>
-                        <View style={styles.endpointRow}>
-                            <Text style={styles.address}>{ipAddress}:8090</Text>
-                            <Pressable
-                                accessibilityLabel="Refresh status"
-                                disabled={busy}
-                                onPress={() => void loadStatus()}
-                                style={styles.refreshButton}
-                            >
-                                <Text style={styles.refreshText}>↻</Text>
-                            </Pressable>
-                        </View>
+                        <Text style={styles.address}>{ipAddress}:8090</Text>
                     </View>
                     <Text style={styles.value}>Source: {status.source}</Text>
                     <View style={styles.statusTrackRow}>
@@ -399,7 +389,6 @@ const styles = StyleSheet.create({
     card: {backgroundColor: '#1f2937', borderRadius: 16, padding: 18, gap: 8},
     sectionTitle: {color: '#f87171', fontSize: 14, fontWeight: '700', letterSpacing: 1, textTransform: 'uppercase'},
     statusHeader: {alignItems: 'center', flexDirection: 'row', justifyContent: 'space-between'},
-    endpointRow: {alignItems: 'center', flexDirection: 'row', gap: 8},
     value: {color: '#ffffff', fontSize: 17},
     statusTrackRow: {minHeight: 24},
     trackValue: {color: '#ffffff', fontSize: 17, lineHeight: 24},
@@ -417,7 +406,5 @@ const styles = StyleSheet.create({
     button: {backgroundColor: '#ffffff', borderRadius: 999, paddingHorizontal: 18, paddingVertical: 12},
     buttonText: {color: '#111111', fontSize: 15, fontWeight: '600'},
     buttonDisabled: {backgroundColor: '#4b5563'},
-    buttonTextDisabled: {color: '#9ca3af'},
-    refreshButton: {alignItems: 'center', borderColor: '#6b7280', borderRadius: 999, borderWidth: 1, height: 32, justifyContent: 'center', width: 32},
-    refreshText: {color: '#ffffff', fontSize: 22, fontWeight: '700', lineHeight: 26}
+    buttonTextDisabled: {color: '#9ca3af'}
 });
