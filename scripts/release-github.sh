@@ -12,12 +12,13 @@ usage() {
   cat >&2 <<EOF
 Usage: $0 [options] [apk|aab] [patch|minor]
 
-Builds the current version, tags it, publishes a GitHub release with the built artifact,
-then bumps the version and pushes that bump commit.
+Builds the current version (or bumps minor version before building), tags it,
+publishes a GitHub release with the built artifact, then bumps the version to
+the next patch and pushes that bump commit.
 
 Options:
-  --patch         Bump patch version (default, e.g. 1.2.3 -> 1.2.4).
-  --minor         Bump minor version and reset patch to zero (e.g. 1.2.3 -> 1.3.0).
+  --patch         Release current version and bump patch version after release (default).
+  --minor         Bump minor version before building/releasing, then bump patch version after release.
   --bump TYPE     Set bump type to 'patch' or 'minor'.
   -h, --help      Show this help.
 
@@ -71,6 +72,42 @@ edit_release_notes() {
     echo "Release notes are empty; refusing to publish." >&2
     exit 1
   fi
+}
+
+preview_bump_version() {
+  node - "$1" <<'NODE'
+const fs = require('fs');
+
+const bumpType = process.argv[2] || 'patch';
+
+function bump(version, type) {
+  const match = version.match(/^(\d+)\.(\d+)\.(\d+)(.*)$/);
+  if (!match) {
+    throw new Error('Unsupported version format: ' + version);
+  }
+  const major = match[1];
+  const minor = Number(match[2]);
+  const patch = Number(match[3]);
+  const extra = match[4];
+
+  if (type === 'minor') {
+    return `${major}.${minor + 1}.0${extra}`;
+  }
+  if (type === 'patch') {
+    return `${major}.${minor}.${patch + 1}${extra}`;
+  }
+  throw new Error('Unsupported bump type: ' + type);
+}
+
+const packageJson = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+const appJson = JSON.parse(fs.readFileSync('app.json', 'utf8'));
+
+if (packageJson.version !== appJson.expo.version) {
+  throw new Error(`package.json version (${packageJson.version}) does not match app.json expo.version (${appJson.expo.version})`);
+}
+
+console.log(bump(packageJson.version, bumpType));
+NODE
 }
 
 bump_version() {
@@ -203,7 +240,11 @@ if [ -z "$BRANCH" ]; then
   exit 1
 fi
 
-VERSION=$(current_version)
+if [ "$BUMP" = "minor" ]; then
+  VERSION=$(preview_bump_version minor)
+else
+  VERSION=$(current_version)
+fi
 TAG="v$VERSION"
 
 if git rev-parse "$TAG" >/dev/null 2>&1; then
@@ -217,6 +258,12 @@ fi
 if gh release view "$TAG" >/dev/null 2>&1; then
   echo "GitHub release already exists: $TAG" >&2
   exit 1
+fi
+
+if [ "$BUMP" = "minor" ]; then
+  bump_version minor >/dev/null
+  git add package.json package-lock.json app.json
+  git commit -m "Bump version to $VERSION"
 fi
 
 "$ROOT_DIR/scripts/build-release.sh" "$MODE"
@@ -249,7 +296,7 @@ git push "$REMOTE" "$TAG"
 
 gh release create "$TAG" "$ARTIFACT" --title "$TAG" --notes "$NOTES"
 
-NEXT_VERSION=$(bump_version "$BUMP")
+NEXT_VERSION=$(bump_version patch)
 git add package.json package-lock.json app.json
 git commit -m "Bump version to $NEXT_VERSION"
 git push "$REMOTE" "$BRANCH"
