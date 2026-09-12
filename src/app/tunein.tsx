@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {Stack, useLocalSearchParams, useRouter} from 'expo-router';
 import {useEffect, useRef, useState} from 'react';
 import {ActivityIndicator, Image, Pressable, ScrollView, StyleSheet, Text, TextInput, View} from 'react-native';
@@ -20,6 +21,8 @@ type BrowseBreadcrumb = {
     path: string;
     name: string;
 };
+
+const SOURCE_STORAGE_KEY = 'aftertouch.source';
 
 function parameter(value: string | string[] | undefined) {
     return Array.isArray(value) ? value[0] ?? '' : value ?? '';
@@ -94,8 +97,9 @@ export default function TuneInScreen() {
     const {ip_address, name} = useLocalSearchParams<{ ip_address?: string | string[]; name?: string | string[] }>();
     const ipAddress = parameter(ip_address);
     const deviceName = parameter(name) || ipAddress || 'Device';
-    const tuneInBaseUri = 'http://' + ipAddress + ':8000/api/control/providers/tunein';
-    const tuneInDeviceBaseUri = 'http://' + ipAddress + ':8000/api/control/devices/' + ipAddress + '/providers/tunein';
+    const [sourceBaseUri, setSourceBaseUri] = useState('');
+    const tuneInBaseUri = sourceBaseUri + '/api/control/providers/tunein';
+    const tuneInDeviceBaseUri = sourceBaseUri + '/api/control/devices/' + ipAddress + '/providers/tunein';
     const [query, setQuery] = useState('');
     const [stations, setStations] = useState<Station[]>([]);
     const [browseItems, setBrowseItems] = useState<BrowseItem[]>([]);
@@ -108,6 +112,22 @@ export default function TuneInScreen() {
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
+        let mounted = true;
+
+        AsyncStorage.getItem(SOURCE_STORAGE_KEY)
+            .then((storedSource) => {
+                if (mounted) {
+                    setSourceBaseUri(storedSource?.trim().replace(/\/+$/, '') ?? '');
+                }
+            })
+            .catch(() => undefined);
+
+        return () => {
+            mounted = false;
+        };
+    }, []);
+
+    useEffect(() => {
         if (browseBreadcrumbs.length > 0) {
             requestAnimationFrame(() => breadcrumbScrollRef.current?.scrollToEnd({animated: false}));
         }
@@ -116,7 +136,7 @@ export default function TuneInScreen() {
 
     async function search() {
         const trimmedQuery = query.trim();
-        if (!ipAddress || !trimmedQuery) {
+        if (!ipAddress || !sourceBaseUri || !trimmedQuery) {
             return;
         }
 
@@ -138,7 +158,7 @@ export default function TuneInScreen() {
     }
 
     async function browse(path = '', name = 'TuneIn', breadcrumbOverride?: BrowseBreadcrumb[]) {
-        if (!ipAddress) {
+        if (!ipAddress || !sourceBaseUri) {
             return;
         }
 
@@ -165,6 +185,10 @@ export default function TuneInScreen() {
     }
 
     async function selectStation(station: Station) {
+        if (!ipAddress || !sourceBaseUri) {
+            return;
+        }
+
         setSelecting(true);
         setError(null);
         try {
@@ -214,11 +238,11 @@ export default function TuneInScreen() {
                             value={query}
                         />
                         <Pressable accessibilityLabel="Search TuneIn"
-                                   disabled={loading || selecting || !ipAddress || !query.trim()}
+                                   disabled={loading || selecting || !ipAddress || !sourceBaseUri || !query.trim()}
                                    onPress={() => void search()} style={styles.searchButton}>
                             <Text style={styles.searchButtonText}>⌕</Text>
                         </Pressable>
-                        <Pressable accessibilityLabel="Browse TuneIn" disabled={loading || selecting || !ipAddress}
+                        <Pressable accessibilityLabel="Browse TuneIn" disabled={loading || selecting || !ipAddress || !sourceBaseUri}
                                    onPress={() => void browse()} style={styles.browseButton}>
                             <Text style={styles.browseButtonText}>Browse</Text>
                         </Pressable>
