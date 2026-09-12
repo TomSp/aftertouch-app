@@ -319,14 +319,24 @@ export default function DeviceScreen() {
                             </Pressable>
                         ))}
                     </View> : <Text style={styles.message}>No configured presets.</Text>}
-                    <Link
-                        href={('/tunein?ip_address=' + encodeURIComponent(ipAddress) + '&name=' + encodeURIComponent(deviceName)) as never}
-                        asChild
-                    >
-                        <Pressable accessibilityLabel="TuneIn" disabled={busy} style={styles.button}>
-                            <Text style={styles.buttonText}>TuneIn</Text>
-                        </Pressable>
-                    </Link>
+                    <View style={styles.libraryRow}>
+                        <Link
+                            href={('/tunein?ip_address=' + encodeURIComponent(ipAddress) + '&name=' + encodeURIComponent(deviceName)) as never}
+                            asChild
+                        >
+                            <Pressable accessibilityLabel="TuneIn" disabled={busy} style={styles.button}>
+                                <Text style={styles.buttonText}>TuneIn</Text>
+                            </Pressable>
+                        </Link>
+                        <Link
+                            href={('/library?ip_address=' + encodeURIComponent(ipAddress) + '&name=' + encodeURIComponent(deviceName)) as never}
+                            asChild
+                        >
+                            <Pressable accessibilityLabel="Library" disabled={busy} style={styles.button}>
+                                <Text style={styles.buttonText}>Library</Text>
+                            </Pressable>
+                        </Link>
+                    </View>
                 </View>
                 {volume ? <View style={styles.card}>
                     <View style={styles.volumeHeader}>
@@ -396,6 +406,7 @@ const styles = StyleSheet.create({
     presetButton: {width: '31%', aspectRatio: 1, overflow: 'hidden', borderColor: '#6b7280', borderRadius: 12, borderWidth: 1, backgroundColor: '#111827', alignItems: 'center', justifyContent: 'center'},
     presetImage: {width: '100%', height: '100%'},
     presetFallback: {color: '#ffffff', fontSize: 13, textAlign: 'center', padding: 8},
+    libraryRow: {alignItems: 'center', flexDirection: 'row', flexWrap: 'wrap', gap: 12},
     volumeHeader: {minHeight: 34, justifyContent: 'center', position: 'relative'},
     volume: {color: '#ffffff', fontSize: 28, fontWeight: '700', left: 0, position: 'absolute', right: 0, textAlign: 'center'},
     volumeControls: {alignItems: 'center', backgroundColor: '#ffffff', borderRadius: 999, flexDirection: 'row', gap: 4, overflow: 'hidden', paddingHorizontal: 4},
