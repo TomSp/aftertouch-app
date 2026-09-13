@@ -3,6 +3,7 @@ import {Stack, useLocalSearchParams, useRouter} from 'expo-router';
 import {useEffect, useRef, useState} from 'react';
 import {ActivityIndicator, Image, Keyboard, Pressable, ScrollView, StyleSheet, Text, TextInput, View} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import {clearLibraryState} from '../libraryState';
 
 type Station = {
     id: string;
@@ -189,6 +190,7 @@ export default function TuneInScreen() {
         setSelecting(true);
         setError(null);
         try {
+            await clearLibraryState(ipAddress);
             const body = JSON.stringify({
                 location: station.location,
                 type: 'stationurl',

@@ -3,6 +3,7 @@ import {Stack, useLocalSearchParams, useRouter} from 'expo-router';
 import {useEffect, useRef, useState} from 'react';
 import {ActivityIndicator, Image, Pressable, ScrollView, StyleSheet, Text, View} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import {LIBRARY_STATE_KEY_PREFIX} from '../libraryState';
 
 type LibraryItem = {
     path: string;
@@ -56,7 +57,6 @@ type LibraryResponseItem = {
 };
 
 const SOURCE_STORAGE_KEY = 'aftertouch.source';
-const LIBRARY_STATE_KEY_PREFIX = 'aftertouch.library.state.';
 
 function parameter(value: string | string[] | undefined) {
     return Array.isArray(value) ? value[0] ?? '' : value ?? '';
@@ -171,7 +171,6 @@ export default function LibraryScreen() {
     const deviceName = parameter(name) || ipAddress || 'Device';
     const [sourceBaseUri, setSourceBaseUri] = useState('');
     const deviceBaseUri = 'http://' + ipAddress + ':8090';
-    const libraryBaseUri = sourceBaseUri + '/api/control/devices/' + ipAddress + '/library';
     const [items, setItems] = useState<LibraryItem[]>([]);
     const [breadcrumbs, setBreadcrumbs] = useState<LibraryBreadcrumb[]>([]);
     const [browsePath, setBrowsePath] = useState('');

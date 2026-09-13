@@ -14,7 +14,8 @@ const keyResponseXml = fs.readFileSync('test-data/key-response.xml', 'utf8');
 
 jest.mock('@react-native-async-storage/async-storage', () => ({
     getItem: jest.fn().mockResolvedValue(null),
-    setItem: jest.fn().mockResolvedValue(undefined)
+    setItem: jest.fn().mockResolvedValue(undefined),
+    removeItem: jest.fn().mockResolvedValue(undefined)
 }));
 
 jest.mock('expo-haptics', () => ({

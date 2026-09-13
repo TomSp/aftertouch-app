@@ -12,7 +12,8 @@ const keyboardDismissSpy = jest.spyOn(Keyboard, 'dismiss').mockImplementation(je
 
 jest.mock('@react-native-async-storage/async-storage', () => ({
     getItem: jest.fn().mockResolvedValue('http://azsound.home.spengler.berlin:8000'),
-    setItem: jest.fn().mockResolvedValue(undefined)
+    setItem: jest.fn().mockResolvedValue(undefined),
+    removeItem: jest.fn().mockResolvedValue(undefined)
 }));
 
 jest.mock('expo-router', () => ({

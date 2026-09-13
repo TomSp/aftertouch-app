@@ -7,6 +7,7 @@ import {useEffect, useRef, useState} from 'react';
 import {Image, Platform, Pressable, ScrollView, StyleSheet, Text, View} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {vibrateBypass} from '../native/forcedVibration';
+import {clearLibraryState} from '../libraryState';
 
 type DeviceStatus = {
     source: string;
@@ -228,6 +229,9 @@ export default function DeviceScreen() {
         setBusy(true);
         setError(null);
         try {
+            if (key === 'POWER' || key.startsWith('PRESET_')) {
+                await clearLibraryState(ipAddress);
+            }
             const body = (state: string) => '<key state="' + state + '" sender="Gabbo">' + key + '</key>';
             await requestText(baseUri + '/key', {method: 'POST', headers: {'Content-Type': 'application/xml'}, body: body('press')});
             await requestText(baseUri + '/key', {method: 'POST', headers: {'Content-Type': 'application/xml'}, body: body('release')});
@@ -245,6 +249,7 @@ export default function DeviceScreen() {
         setBusy(true);
         setError(null);
         try {
+            await clearLibraryState(ipAddress);
             await requestText(baseUri + '/select', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/xml'},
