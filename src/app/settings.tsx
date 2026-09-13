@@ -1,8 +1,9 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Haptics from 'expo-haptics';
+import Constants from 'expo-constants';
 import { Link } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Platform, Pressable, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
+import { Alert, Linking, Platform, Pressable, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {vibrateBypass} from '../native/forcedVibration';
 
@@ -10,8 +11,23 @@ const SOURCE_PATTERN = /^(https?):\/\/([^/:\s]+|\[[^\]]+\]):(\d{1,5})$/i;
 const SOURCE_STORAGE_KEY = 'aftertouch.source';
 const HAPTICS_STORAGE_KEY = 'aftertouch.haptics.enabled';
 const LIBRARY_ROOT_STORAGE_KEY = 'aftertouch.library.root';
+const GITHUB_RELEASES_API = 'https://api.github.com/repos/TomSp/aftertouch-app/releases/latest';
+const APP_VERSION = Constants.expoConfig?.version ?? '0.0.0';
 
 type PickerDevice = {name: string; ipAddress: string};
+
+function isNewerVersion(candidate: string, current: string) {
+  const candidateParts = candidate.split('.').map(Number);
+  const currentParts = current.split('.').map(Number);
+  for (let index = 0; index < 3; index += 1) {
+    const candidatePart = candidateParts[index] || 0;
+    const currentPart = currentParts[index] || 0;
+    if (candidatePart !== currentPart) {
+      return candidatePart > currentPart;
+    }
+  }
+  return false;
+}
 
 function testHapticFeedback() {
   if (Platform.OS === 'android') {
@@ -41,6 +57,8 @@ export default function SettingsScreen() {
   const [hapticsEnabled, setHapticsEnabled] = useState(false);
   const [libraryRoot, setLibraryRoot] = useState('');
   const [pickerDevices, setPickerDevices] = useState<PickerDevice[]>([]);
+  const [updateStatus, setUpdateStatus] = useState('');
+  const [checkingUpdate, setCheckingUpdate] = useState(false);
   const sourceIsValid = isValidSource(source);
 
   useEffect(() => {
@@ -85,6 +103,35 @@ export default function SettingsScreen() {
       }).catch(() => { if (mounted) setPickerDevices([]); });
     return () => { mounted = false; };
   }, [source, sourceIsValid]);
+
+  async function checkForUpdate() {
+    setCheckingUpdate(true);
+    setUpdateStatus('Checking for updates...');
+    try {
+      const response = await fetch(GITHUB_RELEASES_API, {headers: {Accept: 'application/vnd.github+json'}});
+      if (!response.ok) throw new Error('GitHub returned status ' + response.status);
+      const release = await response.json() as {tag_name?: string; html_url?: string; assets?: Array<{name?: string; browser_download_url?: string}>};
+      const latestVersion = (release.tag_name ?? '').replace(/^v/i, '');
+      const newer = /^\d+\.\d+\.\d+$/.test(latestVersion) && isNewerVersion(latestVersion, APP_VERSION);
+      if (!newer) {
+        setUpdateStatus('You are using the latest version.');
+        return;
+      }
+      const apk = release.assets?.find((asset) => asset.name?.toLowerCase().endsWith('.apk'))?.browser_download_url;
+      const updateUrl = apk || release.html_url;
+      setUpdateStatus('Update available: v' + latestVersion);
+      if (updateUrl) {
+        Alert.alert('Update available', 'Download Aftertouch v' + latestVersion + '?', [
+          {text: 'Later', style: 'cancel'},
+          {text: 'Download', onPress: () => void Linking.openURL(updateUrl)}
+        ]);
+      }
+    } catch (error) {
+      setUpdateStatus(error instanceof Error ? error.message : 'Unable to check for updates.');
+    } finally {
+      setCheckingUpdate(false);
+    }
+  }
 
   return (
     <View style={StyleSheet.flatten([styles.safe, { paddingTop: insets.top, paddingBottom: insets.bottom }])}>
@@ -141,6 +188,10 @@ export default function SettingsScreen() {
             value={hapticsEnabled}
           />
         </View>
+        <Pressable accessibilityLabel="Check for updates" disabled={checkingUpdate} onPress={() => void checkForUpdate()} style={styles.button}>
+          <Text style={styles.buttonText}>{checkingUpdate ? 'Checking...' : 'Check for updates'}</Text>
+        </Pressable>
+        {updateStatus ? <Text accessibilityLabel="Update status" style={styles.description}>{updateStatus}</Text> : null}
         <Pressable accessibilityLabel="Test vibration" onPress={testHapticFeedback} style={styles.button}>
           <Text style={styles.buttonText}>Test vibration</Text>
         </Pressable>
