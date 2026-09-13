@@ -9,6 +9,9 @@ import {vibrateBypass} from '../native/forcedVibration';
 const SOURCE_PATTERN = /^(https?):\/\/([^/:\s]+|\[[^\]]+\]):(\d{1,5})$/i;
 const SOURCE_STORAGE_KEY = 'aftertouch.source';
 const HAPTICS_STORAGE_KEY = 'aftertouch.haptics.enabled';
+const LIBRARY_ROOT_STORAGE_KEY = 'aftertouch.library.root';
+
+type PickerDevice = {name: string; ipAddress: string};
 
 function testHapticFeedback() {
   if (Platform.OS === 'android') {
@@ -36,6 +39,8 @@ export default function SettingsScreen() {
   const [source, setSource] = useState('');
   const [sourceTouched, setSourceTouched] = useState(false);
   const [hapticsEnabled, setHapticsEnabled] = useState(false);
+  const [libraryRoot, setLibraryRoot] = useState('');
+  const [pickerDevices, setPickerDevices] = useState<PickerDevice[]>([]);
   const sourceIsValid = isValidSource(source);
 
   useEffect(() => {
@@ -46,11 +51,12 @@ export default function SettingsScreen() {
         if (mounted && storedSource) {
           setSource(storedSource);
         }
-        return AsyncStorage.getItem(HAPTICS_STORAGE_KEY);
+        return Promise.all([AsyncStorage.getItem(HAPTICS_STORAGE_KEY), AsyncStorage.getItem(LIBRARY_ROOT_STORAGE_KEY)]);
       })
-      .then((storedHaptics) => {
+      .then(([storedHaptics, storedRoot]) => {
         if (mounted) {
           setHapticsEnabled(storedHaptics === 'true');
+          try { setLibraryRoot(storedRoot ? (JSON.parse(storedRoot) as {name?: string; path?: string}).name ?? '' : ''); } catch { setLibraryRoot(storedRoot ?? ''); }
         }
       })
       .catch(() => undefined);
@@ -59,6 +65,26 @@ export default function SettingsScreen() {
       mounted = false;
     };
   }, []);
+
+  useEffect(() => {
+    if (!sourceIsValid) { setPickerDevices([]); return; }
+    let mounted = true;
+    fetch(source.trim() + '/setup/devices')
+      .then((response) => response.ok ? response.json() as Promise<unknown> : Promise.reject(new Error('Unable to load devices.')))
+      .then((payload) => {
+        const values = Array.isArray(payload) ? payload : payload && typeof payload === 'object' && 'devices' in payload && Array.isArray(payload.devices) ? payload.devices : [];
+        const devices = values.flatMap((value) => {
+          if (!value || typeof value !== 'object') return [];
+          const device = value as Record<string, unknown>;
+          const ip = String(device.ip_address ?? device.ip ?? device.host ?? '');
+          const serial = String(device.device_serial_number ?? '');
+          const name = String(device.name ?? device.device_name ?? device.deviceName ?? device.label ?? ip);
+          return ip && serial ? [{name, ipAddress: ip}] : [];
+        });
+        if (mounted) setPickerDevices(devices);
+      }).catch(() => { if (mounted) setPickerDevices([]); });
+    return () => { mounted = false; };
+  }, [source, sourceIsValid]);
 
   return (
     <View style={StyleSheet.flatten([styles.safe, { paddingTop: insets.top, paddingBottom: insets.bottom }])}>
@@ -86,6 +112,18 @@ export default function SettingsScreen() {
           {sourceTouched && !sourceIsValid ? (
             <Text style={styles.error}>Use a valid HTTP source such as http://localhost:8080 or https://device.local:443.</Text>
           ) : null}
+        </View>
+        <View style={styles.field}>
+          <Text style={styles.label}>Library root</Text>
+          <Text accessibilityLabel="Selected Library root" style={styles.selectedValue}>{libraryRoot || 'Media server list'}</Text>
+          <Text style={styles.description}>Choose a device in Library root selection, then long press a folder to set it as the root.</Text>
+          {pickerDevices.map((device) => (
+            <Link href={('/library?ip_address=' + encodeURIComponent(device.ipAddress) + '&name=' + encodeURIComponent(device.name) + '&select_root=true') as never} key={device.ipAddress} asChild>
+              <Pressable accessibilityLabel={'Choose Library root on ' + device.name} style={styles.button}>
+                <Text style={styles.buttonText}>{'Choose on ' + device.name}</Text>
+              </Pressable>
+            </Link>
+          ))}
         </View>
         <View style={styles.settingRow}>
           <View style={styles.settingCopy}>
@@ -171,6 +209,7 @@ const styles = StyleSheet.create({
     color: '#f87171',
     fontSize: 14
   },
+  selectedValue: {color: '#ffffff', fontSize: 16, fontWeight: '600'},
   button: {
     alignSelf: 'flex-start',
     backgroundColor: '#ffffff',
