@@ -331,8 +331,10 @@ export default function LibraryScreen() {
                     {items.map((item) => (
                         <Pressable
                             accessibilityLabel={'Browse ' + item.name}
+                            accessibilityHint={selectingRoot && item.isDir ? 'Long press to set this folder as the Library root.' : undefined}
                             disabled={loading || !item.isDir}
                             key={item.path}
+                            onLongPress={() => selectingRoot && item.isDir ? void selectItemAsRoot(item) : undefined}
                             onPress={() => item.isDir ? void browse(item.path, item.name) : undefined}
                             style={StyleSheet.flatten([styles.item, !item.isDir && styles.itemDisabled])}
                         >
