@@ -114,7 +114,7 @@ The search and navigation fixtures are stored in `test-data/tunein-search.json` 
 - App icon: `assets/icon.png`
 - Adaptive icon: `assets/adaptive-icon.png`
 - Splash image: `assets/splash.png`
-- Source logo: `assets/logo.svg`
+- Source logo: `assets/logo.png`
 - Header icon source: `assets/icon.png`
 
 ## Build Notes
