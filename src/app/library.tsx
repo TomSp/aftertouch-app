@@ -57,6 +57,7 @@ type LibraryResponseItem = {
 };
 
 const SOURCE_STORAGE_KEY = 'aftertouch.source';
+const LIBRARY_ROOT_STORAGE_KEY = 'aftertouch.library.root';
 
 function parameter(value: string | string[] | undefined) {
     return Array.isArray(value) ? value[0] ?? '' : value ?? '';
@@ -166,8 +167,9 @@ async function requestText(uri: string, options?: RequestInit) {
 export default function LibraryScreen() {
     const insets = useSafeAreaInsets();
     const router = useRouter();
-    const {ip_address, name} = useLocalSearchParams<{ip_address?: string | string[]; name?: string | string[]}>();
+    const {ip_address, name, select_root} = useLocalSearchParams<{ip_address?: string | string[]; name?: string | string[]; select_root?: string | string[]}>();
     const ipAddress = parameter(ip_address);
+    const selectingRoot = parameter(select_root) === 'true';
     const deviceName = parameter(name) || ipAddress || 'Device';
     const [sourceBaseUri, setSourceBaseUri] = useState('');
     const deviceBaseUri = 'http://' + ipAddress + ':8090';
@@ -183,9 +185,10 @@ export default function LibraryScreen() {
 
         async function restoreLibrary() {
             try {
-                const [storedSource, storedState] = await Promise.all([
+                const [storedSource, storedState, storedRoot] = await Promise.all([
                     AsyncStorage.getItem(SOURCE_STORAGE_KEY),
-                    ipAddress ? AsyncStorage.getItem(LIBRARY_STATE_KEY_PREFIX + ipAddress) : Promise.resolve(null)
+                    ipAddress ? AsyncStorage.getItem(LIBRARY_STATE_KEY_PREFIX + ipAddress) : Promise.resolve(null),
+                    AsyncStorage.getItem(LIBRARY_ROOT_STORAGE_KEY)
                 ]);
                 if (!mounted) {
                     return;
@@ -202,7 +205,9 @@ export default function LibraryScreen() {
                 }
 
                 if (ipAddress) {
-                    const path = savedState?.path ?? '';
+                    let configuredRoot = '';
+                    try { configuredRoot = storedRoot ? (JSON.parse(storedRoot) as {path?: string}).path ?? '' : storedRoot?.trim() ?? ''; } catch { configuredRoot = storedRoot?.trim() ?? ''; }
+                    const path = selectingRoot ? '' : savedState?.path ?? configuredRoot;
                     const savedBreadcrumbs = Array.isArray(savedState?.breadcrumbs) ? savedState.breadcrumbs : undefined;
                     await browse(path, savedBreadcrumbs?.at(-1)?.name ?? 'Library', savedBreadcrumbs, nextSource);
                 }
@@ -218,7 +223,7 @@ export default function LibraryScreen() {
         return () => {
             mounted = false;
         };
-    }, [ipAddress]);
+    }, [ipAddress, selectingRoot]);
 
     useEffect(() => {
         if (breadcrumbs.length > 0) {
@@ -249,6 +254,13 @@ export default function LibraryScreen() {
         } finally {
             setLoading(false);
         }
+    }
+
+    async function selectItemAsRoot(item: LibraryItem) {
+        if (!ipAddress || !item.isDir || !item.path) return;
+        await AsyncStorage.setItem(LIBRARY_ROOT_STORAGE_KEY, JSON.stringify({path: item.path, name: item.name}));
+        await AsyncStorage.removeItem(LIBRARY_STATE_KEY_PREFIX + ipAddress);
+        router.back();
     }
 
     async function playItem(item: LibraryItem) {
@@ -329,7 +341,20 @@ export default function LibraryScreen() {
                                 <Text style={styles.itemName}>{item.name}</Text>
                                 {item.subtitle ? <Text style={styles.itemSubtitle}>{item.subtitle}</Text> : null}
                             </View>
-                            {item.playable ? (
+                            {selectingRoot && item.isDir ? (
+                                <Pressable
+                                    accessibilityLabel={'Select ' + item.name + ' as Library root'}
+                                    disabled={loading}
+                                    onPress={(event) => {
+                                        event?.stopPropagation();
+                                        void selectItemAsRoot(item);
+                                    }}
+                                    style={styles.selectRootButton}
+                                >
+                                    <Text style={styles.selectRootButtonText}>Select</Text>
+                                </Pressable>
+                            ) : null}
+                            {item.playable && !selectingRoot ? (
                                 <Pressable
                                     accessibilityLabel={'Play ' + item.name}
                                     disabled={loading}
@@ -381,6 +406,8 @@ const styles = StyleSheet.create({
     itemCopy: {flex: 1, gap: 4},
     itemName: {color: '#ffffff', fontSize: 17, fontWeight: '600'},
     itemSubtitle: {color: '#9ca3af', fontSize: 14},
+    selectRootButton: {alignItems: 'center', backgroundColor: '#f87171', borderRadius: 10, justifyContent: 'center', minHeight: 44, paddingHorizontal: 12},
+    selectRootButtonText: {color: '#111111', fontSize: 15, fontWeight: '600'},
     playButton: {alignItems: 'center', backgroundColor: '#ffffff', borderRadius: 999, height: 44, justifyContent: 'center', width: 44},
     playButtonText: {color: '#111111', fontSize: 20, fontWeight: '700', lineHeight: 24, marginLeft: 2, textAlign: 'center'},
     message: {color: '#d1d5db', fontSize: 16},

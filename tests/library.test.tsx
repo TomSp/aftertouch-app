@@ -33,7 +33,7 @@ function renderLibrary() {
 describe('LibraryScreen', () => {
     beforeEach(() => {
         jest.clearAllMocks();
-        (AsyncStorage.getItem as jest.Mock).mockImplementation((key: string) => Promise.resolve(key.startsWith('aftertouch.library.state.') ? null : 'http://azsound.home.spengler.berlin:8000'));
+        (AsyncStorage.getItem as jest.Mock).mockImplementation((key: string) => Promise.resolve(key.startsWith('aftertouch.library.state.') || key === 'aftertouch.library.root' ? null : 'http://azsound.home.spengler.berlin:8000'));
         global.fetch = jest.fn().mockImplementation((uri: string) => Promise.resolve({
             ok: true,
             text: async () => uri.includes('location=1&type=dir') ? musicBrowseResponse : uri.includes('/api/control/devices/192.168.1.187/library/browse') ? rootBrowseResponse : mediaServersResponse
