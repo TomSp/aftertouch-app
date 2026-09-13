@@ -56,6 +56,7 @@ type LibraryResponseItem = {
 };
 
 const SOURCE_STORAGE_KEY = 'aftertouch.source';
+const LIBRARY_STATE_KEY_PREFIX = 'aftertouch.library.state.';
 
 function parameter(value: string | string[] | undefined) {
     return Array.isArray(value) ? value[0] ?? '' : value ?? '';
@@ -181,18 +182,44 @@ export default function LibraryScreen() {
     useEffect(() => {
         let mounted = true;
 
-        AsyncStorage.getItem(SOURCE_STORAGE_KEY)
-            .then((storedSource) => {
-                if (mounted) {
-                    setSourceBaseUri(storedSource?.trim().replace(/\/+$/, '') ?? '');
+        async function restoreLibrary() {
+            try {
+                const [storedSource, storedState] = await Promise.all([
+                    AsyncStorage.getItem(SOURCE_STORAGE_KEY),
+                    ipAddress ? AsyncStorage.getItem(LIBRARY_STATE_KEY_PREFIX + ipAddress) : Promise.resolve(null)
+                ]);
+                if (!mounted) {
+                    return;
                 }
-            })
-            .catch(() => undefined);
+
+                const nextSource = storedSource?.trim().replace(/\/+$/, '') ?? '';
+                setSourceBaseUri(nextSource);
+
+                let savedState: {path?: string; breadcrumbs?: LibraryBreadcrumb[]} | null = null;
+                try {
+                    savedState = storedState ? JSON.parse(storedState) as {path?: string; breadcrumbs?: LibraryBreadcrumb[]} : null;
+                } catch {
+                    savedState = null;
+                }
+
+                if (ipAddress) {
+                    const path = savedState?.path ?? '';
+                    const savedBreadcrumbs = Array.isArray(savedState?.breadcrumbs) ? savedState.breadcrumbs : undefined;
+                    await browse(path, savedBreadcrumbs?.at(-1)?.name ?? 'Library', savedBreadcrumbs, nextSource);
+                }
+            } catch {
+                if (mounted && ipAddress) {
+                    await browse();
+                }
+            }
+        }
+
+        void restoreLibrary();
 
         return () => {
             mounted = false;
         };
-    }, []);
+    }, [ipAddress]);
 
     useEffect(() => {
         if (breadcrumbs.length > 0) {
@@ -200,14 +227,8 @@ export default function LibraryScreen() {
         }
     }, [breadcrumbs]);
 
-    useEffect(() => {
-        if (ipAddress) {
-            void browse();
-        }
-    }, [ipAddress]);
-
-    async function browse(path = '', itemName = 'Library', breadcrumbOverride?: LibraryBreadcrumb[]) {
-        if (!ipAddress || (path && !sourceBaseUri)) {
+    async function browse(path = '', itemName = 'Library', breadcrumbOverride?: LibraryBreadcrumb[], sourceOverride = sourceBaseUri) {
+        if (!ipAddress || (path && !sourceOverride)) {
             return;
         }
 
@@ -215,11 +236,14 @@ export default function LibraryScreen() {
         setLoading(true);
         setError(null);
         try {
-            const target = path ? libraryBaseUri + path : deviceBaseUri + '/listMediaServers';
+            const target = path ? sourceOverride + '/api/control/devices/' + ipAddress + '/library' + path : deviceBaseUri + '/listMediaServers';
             const result = await requestText(target);
             setBreadcrumbs(nextBreadcrumbs);
             setBrowsePath(path);
             setItems(path ? parseLibraryItems(result) : parseMediaServers(result));
+            if (ipAddress) {
+                void AsyncStorage.setItem(LIBRARY_STATE_KEY_PREFIX + ipAddress, JSON.stringify({path, breadcrumbs: nextBreadcrumbs}));
+            }
         } catch (requestError) {
             setItems([]);
             setError(requestError instanceof Error ? requestError.message : 'Unable to browse library.');
