@@ -221,7 +221,7 @@ export default function TuneInScreen() {
                 )
             }}/>
             <View style={StyleSheet.flatten([styles.safe, {paddingBottom: insets.bottom}])}>
-                <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+                <View style={styles.stickyHeader}>
                     <View style={styles.searchRow}>
                         <TextInput
                             accessibilityLabel="TuneIn search"
@@ -246,8 +246,6 @@ export default function TuneInScreen() {
                         </Pressable>
                     </View>
                     {error ? <Text style={styles.error}>{error}</Text> : null}
-                    {!loading && !error && query.trim() && stations.length === 0 && browseItems.length === 0 ?
-                        <Text style={styles.message}>No stations found.</Text> : null}
                     {browseBreadcrumbs.length > 0 ? (
                         <ScrollView
                             horizontal
@@ -270,6 +268,10 @@ export default function TuneInScreen() {
                             ))}
                         </ScrollView>
                     ) : null}
+                </View>
+                <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+                    {!loading && !error && query.trim() && stations.length === 0 && browseItems.length === 0 ?
+                        <Text style={styles.message}>No stations found.</Text> : null}
                     {browseItems.map((item) => (
                         <Pressable
                             accessibilityLabel={'Browse ' + item.name}
@@ -319,6 +321,7 @@ const styles = StyleSheet.create({
         top: 0
     },
     container: {flexGrow: 1, padding: 24, gap: 12},
+    stickyHeader: {backgroundColor: '#0b0b0b', paddingHorizontal: 24, paddingTop: 24, zIndex: 1},
     headerTitle: {maxWidth: 220},
     headerTitleText: {color: '#f5f5f5', fontSize: 18, fontWeight: '600'},
     searchRow: {alignItems: 'center', flexDirection: 'row', gap: 8},

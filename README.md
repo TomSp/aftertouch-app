@@ -1,6 +1,6 @@
-# Aftertouch Android App Starter
+# Aftertouch Android App 
 
-This repository is scaffolded as an Expo + TypeScript Android app starter.
+This repository is scaffolded as an Expo + TypeScript Android app.
 
 ## Setup
 

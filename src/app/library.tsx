@@ -266,10 +266,8 @@ export default function LibraryScreen() {
                 )
             }}/>
             <View style={StyleSheet.flatten([styles.safe, {paddingBottom: insets.bottom}])}>
-                <ScrollView contentContainerStyle={styles.container}>
-                    {error ? <Text style={styles.error}>{error}</Text> : null}
-                    {!loading && !error && items.length === 0 ? <Text style={styles.message}>No media servers found.</Text> : null}
-                    {breadcrumbs.length > 0 ? (
+                {breadcrumbs.length > 0 ? (
+                    <View style={styles.stickyHeader}>
                         <ScrollView
                             horizontal
                             contentContainerStyle={styles.breadcrumbs}
@@ -290,7 +288,11 @@ export default function LibraryScreen() {
                                 </Pressable>
                             ))}
                         </ScrollView>
-                    ) : null}
+                    </View>
+                ) : null}
+                <ScrollView contentContainerStyle={styles.container}>
+                    {error ? <Text style={styles.error}>{error}</Text> : null}
+                    {!loading && !error && items.length === 0 ? <Text style={styles.message}>No media servers found.</Text> : null}
                     {items.map((item) => (
                         <Pressable
                             accessibilityLabel={'Browse ' + item.name}
@@ -343,6 +345,7 @@ const styles = StyleSheet.create({
         top: 0
     },
     container: {flexGrow: 1, padding: 24, gap: 12},
+    stickyHeader: {backgroundColor: '#0b0b0b', paddingHorizontal: 24, paddingTop: 12, zIndex: 1},
     headerTitle: {maxWidth: 220},
     headerTitleText: {color: '#f5f5f5', fontSize: 18, fontWeight: '600'},
     breadcrumbScroll: {flexGrow: 0, height: 40},
