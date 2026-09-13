@@ -74,6 +74,9 @@ describe('DeviceScreen API interactions', () => {
             if (uri.endsWith('/key')) {
                 return Promise.resolve(response(keyResponseXml));
             }
+            if (uri.endsWith('/select')) {
+                return Promise.resolve(response(keyResponseXml));
+            }
             if (uri.endsWith('/volume')) {
                 return Promise.resolve(response(keyResponseXml));
             }
@@ -92,6 +95,7 @@ describe('DeviceScreen API interactions', () => {
         expect(screen.getByLabelText('Next track')).toBeDisabled();
         expect(screen.getByLabelText('TuneIn')).toBeTruthy();
         expect(screen.getByLabelText('Library')).toBeTruthy();
+        expect(screen.getByLabelText('Bluetooth')).toBeTruthy();
         expect(screen.getByText('25')).toBeTruthy();
         expect(screen.getByLabelText('Preset 1: 94.3 RS2')).toBeTruthy();
         expect(screen.getByTestId('preset-image-1').props.source).toEqual({uri: 'http://cdn-profiles.tunein.com/s25221/images/logoq.jpg?t=2'});
@@ -117,6 +121,20 @@ describe('DeviceScreen API interactions', () => {
             expect(keyRequests).toHaveLength(2);
             expect(keyRequests[0][1]).toMatchObject({method: 'POST', body: '<key state="press" sender="Gabbo">POWER</key>'});
             expect(keyRequests[1][1]).toMatchObject({method: 'POST', body: '<key state="release" sender="Gabbo">POWER</key>'});
+            expect((global.fetch as jest.Mock).mock.calls.filter(([uri]) => uri.endsWith('/now_playing'))).toHaveLength(2);
+        }, {timeout: 4000});
+    });
+
+    it('switches to Bluetooth through the select API', async () => {
+        const screen = renderDevice();
+        await screen.findByText('25');
+
+        fireEvent.press(screen.getByLabelText('Bluetooth'));
+
+        await waitFor(() => {
+            const selectRequests = (global.fetch as jest.Mock).mock.calls.filter(([uri]) => uri.endsWith('/select'));
+            expect(selectRequests).toHaveLength(1);
+            expect(selectRequests[0][1]).toMatchObject({method: 'POST', headers: {'Content-Type': 'application/xml'}, body: '<ContentItem source="BLUETOOTH"></ContentItem>'});
             expect((global.fetch as jest.Mock).mock.calls.filter(([uri]) => uri.endsWith('/now_playing'))).toHaveLength(2);
         }, {timeout: 4000});
     });

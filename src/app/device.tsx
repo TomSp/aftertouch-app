@@ -239,6 +239,25 @@ export default function DeviceScreen() {
         }
     }
 
+    async function selectBluetooth() {
+        const previousStatus = status;
+        provideHapticFeedback();
+        setBusy(true);
+        setError(null);
+        try {
+            await requestText(baseUri + '/select', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/xml'},
+                body: '<ContentItem source="BLUETOOTH"></ContentItem>'
+            });
+            await reloadUntilStatusChanges(previousStatus);
+        } catch (requestError) {
+            setError(requestError instanceof Error ? requestError.message : 'Unable to select Bluetooth.');
+        } finally {
+            setBusy(false);
+        }
+    }
+
     async function setVolumeValue(nextVolume: number, reloadStatus = false) {
         provideHapticFeedback();
         setVolume((current) => {
@@ -336,6 +355,9 @@ export default function DeviceScreen() {
                                 <Text style={styles.buttonText}>Library</Text>
                             </Pressable>
                         </Link>
+                        <Pressable accessibilityLabel="Bluetooth" disabled={busy} onPress={() => void selectBluetooth()} style={styles.sourceIconButton}>
+                            <Text style={styles.bluetoothIcon}>ᛒ</Text>
+                        </Pressable>
                     </View>
                 </View>
                 {volume ? <View style={styles.card}>
@@ -416,6 +438,8 @@ const styles = StyleSheet.create({
     controls: {flexDirection: 'row', flexWrap: 'wrap', gap: 12},
     button: {backgroundColor: '#ffffff', borderRadius: 999, paddingHorizontal: 18, paddingVertical: 12},
     buttonText: {color: '#111111', fontSize: 15, fontWeight: '600'},
+    sourceIconButton: {alignItems: 'center', backgroundColor: '#ffffff', borderRadius: 999, height: 44, justifyContent: 'center', marginLeft: 'auto', width: 44},
+    bluetoothIcon: {color: '#111111', fontSize: 27, fontWeight: '700', lineHeight: 32},
     buttonDisabled: {backgroundColor: '#4b5563'},
     buttonTextDisabled: {color: '#9ca3af'}
 });
