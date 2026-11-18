@@ -24,7 +24,7 @@ describe('HomeScreen device loading', () => {
   });
 
   it('renders only devices with a device_serial_number', async () => {
-    const screen = render(
+    const screen = await render(
       <SafeAreaProvider initialMetrics={{ frame: { x: 0, y: 0, width: 320, height: 640 }, insets: { top: 0, right: 0, bottom: 0, left: 0 } }}>
         <HomeScreen />
       </SafeAreaProvider>

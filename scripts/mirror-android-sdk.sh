@@ -7,10 +7,13 @@ TMP_DIR="${TMPDIR:-/tmp}/aftertouch-android-sdk"
 TOOLS_VERSION="15859902"
 TOOLS_ZIP="commandlinetools-linux-${TOOLS_VERSION}_latest.zip"
 TOOLS_URL="https://dl.google.com/android/repository/${TOOLS_ZIP}"
-SDKMANAGER="$TARGET_DIR/cmdline-tools/latest/bin/sdkmanager"
+ANDROID_CLI="$TARGET_DIR/cmdline-tools/latest/bin/android"
+AVD_HOME="${ANDROID_AVD_HOME:-$ROOT_DIR/.android/avd}"
+AVD_NAME="aftertouch_api36"
+SYSTEM_IMAGE="system-images;android-36;google_apis;x86_64"
 
 if ! command -v java >/dev/null 2>&1; then
-  echo "Java is required to run sdkmanager." >&2
+  echo "Java is required to run the Android command-line tools." >&2
   exit 1
 fi
 
@@ -41,8 +44,18 @@ cat > "$TARGET_DIR/licenses/android-sdk-preview-license" <<'EOF'
 84831b9409646a918e30573bab4c9c91346d8abd
 EOF
 
-yes | "$SDKMANAGER" --sdk_root="$TARGET_DIR" --licenses >/dev/null
-"$SDKMANAGER" --sdk_root="$TARGET_DIR" "platform-tools" "build-tools;36.0.0" "platforms;android-36" "ndk;27.1.12297006"
+yes | "$ANDROID_CLI" --sdk="$TARGET_DIR" sdk install \
+  "platform-tools" "build-tools;37.0.0" "platforms;android-37" \
+  "ndk;27.1.12297006" "emulator" "$SYSTEM_IMAGE"
+
+mkdir -p "$AVD_HOME"
+if [ ! -f "$AVD_HOME/$AVD_NAME.ini" ]; then
+  printf 'no\n' | ANDROID_HOME="$TARGET_DIR" ANDROID_SDK_ROOT="$TARGET_DIR" \
+    ANDROID_AVD_HOME="$AVD_HOME" \
+    "$TARGET_DIR/cmdline-tools/latest/bin/avdmanager" create avd \
+      --name "$AVD_NAME" --package "$SYSTEM_IMAGE" \
+      --path "$AVD_HOME/$AVD_NAME.avd"
+fi
 
 rm -rf "$TMP_DIR"
 echo "$TARGET_DIR"

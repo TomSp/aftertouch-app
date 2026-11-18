@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {Stack, useLocalSearchParams, useRouter} from 'expo-router';
 import {useEffect, useRef, useState} from 'react';
-import {ActivityIndicator, Image, Pressable, ScrollView, StyleSheet, Text, View} from 'react-native';
+import {ActivityIndicator, Image, Pressable, ScrollView, type ScrollViewInstance, StyleSheet, Text, View} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {LIBRARY_STATE_KEY_PREFIX} from '../libraryState';
 
@@ -176,7 +176,7 @@ export default function LibraryScreen() {
     const [items, setItems] = useState<LibraryItem[]>([]);
     const [breadcrumbs, setBreadcrumbs] = useState<LibraryBreadcrumb[]>([]);
     const [browsePath, setBrowsePath] = useState('');
-    const breadcrumbScrollRef = useRef<ScrollView>(null);
+    const breadcrumbScrollRef = useRef<ScrollViewInstance>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 

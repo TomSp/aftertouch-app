@@ -2,6 +2,8 @@
 
 This repository is scaffolded as an Expo + TypeScript Android app.
 
+The app uses Expo SDK 58 and React Native 0.88. Use Node.js 24.15 or newer on the Node.js 24 release line (24.22.1 is verified).
+
 ## Setup
 
 1. Install dependencies:
@@ -15,7 +17,7 @@ This repository is scaffolded as an Expo + TypeScript Android app.
      ```bash
      ./scripts/mirror-android-sdk.sh
      ```
-   - The helper installs Android 16 platform support, Build-Tools 36.x, and NDK 27.1.12297006.
+   - The helper installs Android API 37 platform support, Build-Tools 37.0.0, NDK 27.1.12297006, and the emulator with an API 36 virtual device.
    - The build scripts use `sdk/android-sdk` by default unless `ANDROID_SDK_ROOT` or `ANDROID_HOME` overrides it.
 
 3. Run locally with the cached SDK mirror:
@@ -28,12 +30,13 @@ This repository is scaffolded as an Expo + TypeScript Android app.
      ```bash
      npm run emulator
      ```
-   - The emulator starts with a visible window by default. Use `EMULATOR_HEADLESS=1 npm run emulator` if you want it hidden.
+   - The emulator starts with a visible window using a Xiaomi Mi 10T Pro screen profile (1080 × 2400, approximately 395 dpi). It cold boots with existing user data to apply the screen size. Use `EMULATOR_HEADLESS=1 npm run emulator` if you want it hidden.
    - Then run the app against a connected Android device with:
      ```bash
      npm run android:device
      ```
    - The `npm run android:device` launcher now regenerates the Android project only when native inputs change.
+   - The launcher requires a full JDK with `java` and `javac`. Set `JAVA_HOME` explicitly, or let it find a JDK on `PATH`, in the Gradle JDK cache, or under `/usr/lib/jvm`.
    - If you prefer the lower-level flow, run `npm run android` in a second terminal after the device is connected.
 
 4. Build the APK when needed:
@@ -110,6 +113,8 @@ npm run release:github -- minor
 
 ## Notes
 
+- Dependencies follow Expo SDK 58's supported versions, including React 19.3.0, AsyncStorage 2.2.0, Slider 5.2.1, and TypeScript 6.0.3.
+- The `minimatch@^10` override uses patched 11.x releases for Expo fingerprinting and test coverage ([security advisory](https://github.com/advisories/GHSA-g3hv-75wg-m249)). Jest's vulnerable `deepmerge` dependency is replaced by the local `tools/jest-deepmerge` adapter backed by `@fastify/deepmerge`. It supports Jest's pair and `.all` merge calls, preserves array concatenation and cloning, and rejects custom merge options. Regression tests cover configuration merging and prototype poisoning. Remove this override when Jest ships an upstream fix. The `.npmrc` setting packs the adapter so `scripts/build.sh` can relocate `node_modules` safely.
 - The native Android project is generated on demand and is not committed to the repo.
 - Update `app.json` if you need to change the Android package name.
 - Release builds require Android signing to be configured in the generated native project.

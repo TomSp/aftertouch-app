@@ -30,45 +30,45 @@ describe('TuneInScreen', () => {
     });
 
     it('searches the targeted device and renders station results', async () => {
-        const screen = render(
+        const screen = await render(
             <SafeAreaProvider initialMetrics={{frame: {x: 0, y: 0, width: 320, height: 640}, insets: {top: 0, right: 0, bottom: 0, left: 0}}}>
                 <TuneInScreen/>
             </SafeAreaProvider>
         );
 
-        fireEvent.changeText(screen.getByLabelText('TuneIn search'), '94,3');
+        await fireEvent.changeText(screen.getByLabelText('TuneIn search'), '94,3');
         await waitFor(() => expect(screen.getByLabelText('Search TuneIn')).not.toBeDisabled());
-        fireEvent.press(screen.getByLabelText('Search TuneIn'));
+        await fireEvent.press(screen.getByLabelText('Search TuneIn'));
 
         await waitFor(() => expect(screen.getAllByLabelText('Select 94,3 RS2').length).toBeGreaterThan(0));
         expect(global.fetch).toHaveBeenCalledWith('http://azsound.home.spengler.berlin:8000/api/control/providers/tunein/search?q=94%2C3', undefined);
     });
 
     it('returns to the device screen from the header title', async () => {
-        const screen = render(
+        const screen = await render(
             <SafeAreaProvider initialMetrics={{frame: {x: 0, y: 0, width: 320, height: 640}, insets: {top: 0, right: 0, bottom: 0, left: 0}}}>
                 <TuneInScreen/>
             </SafeAreaProvider>
         );
 
         await waitFor(() => expect(screen.getByLabelText('Browse TuneIn')).not.toBeDisabled());
-        fireEvent.press(screen.getByLabelText('Back to EZ SoundTouch'));
+        await fireEvent.press(screen.getByLabelText('Back to EZ SoundTouch'));
 
         expect(mockBack).toHaveBeenCalled();
     });
 
     it('selects a station on the device and returns to the device screen', async () => {
-        const screen = render(
+        const screen = await render(
             <SafeAreaProvider initialMetrics={{frame: {x: 0, y: 0, width: 320, height: 640}, insets: {top: 0, right: 0, bottom: 0, left: 0}}}>
                 <TuneInScreen/>
             </SafeAreaProvider>
         );
 
-        fireEvent.changeText(screen.getByLabelText('TuneIn search'), '94,3');
+        await fireEvent.changeText(screen.getByLabelText('TuneIn search'), '94,3');
         await waitFor(() => expect(screen.getByLabelText('Search TuneIn')).not.toBeDisabled());
-        fireEvent.press(screen.getByLabelText('Search TuneIn'));
+        await fireEvent.press(screen.getByLabelText('Search TuneIn'));
         const station = await screen.findAllByLabelText('Select 94,3 RS2');
-        fireEvent.press(station[0]);
+        await fireEvent.press(station[0]);
 
         await waitFor(() => expect(mockBack).toHaveBeenCalled());
         expect(keyboardDismissSpy).toHaveBeenCalled();
@@ -79,25 +79,25 @@ describe('TuneInScreen', () => {
         }));
     });
     it('browses TuneIn categories on the targeted device', async () => {
-        const screen = render(
+        const screen = await render(
             <SafeAreaProvider initialMetrics={{frame: {x: 0, y: 0, width: 320, height: 640}, insets: {top: 0, right: 0, bottom: 0, left: 0}}}>
                 <TuneInScreen/>
             </SafeAreaProvider>
         );
 
         await waitFor(() => expect(screen.getByLabelText('Browse TuneIn')).not.toBeDisabled());
-        fireEvent.press(screen.getByLabelText('Browse TuneIn'));
+        await fireEvent.press(screen.getByLabelText('Browse TuneIn'));
 
         expect(await screen.findByText('Local Radio')).toBeTruthy();
         expect(screen.getByText('Music')).toBeTruthy();
         expect(global.fetch).toHaveBeenCalledWith('http://azsound.home.spengler.berlin:8000/api/control/providers/tunein/navigate', undefined);
 
-        fireEvent.press(screen.getByLabelText('Browse Local Radio'));
+        await fireEvent.press(screen.getByLabelText('Browse Local Radio'));
         await waitFor(() => expect(global.fetch).toHaveBeenCalledWith(
             'http://azsound.home.spengler.berlin:8000/api/control/providers/tunein/navigate/aHR0cDovL29wbWwucmFkaW90aW1lLmNvbS9Ccm93c2UuYXNoeD9jPWxvY2FsJnJlbmRlcj1qc29u',
             undefined
         ));
-        fireEvent.press(screen.getByLabelText('Back to Local Radio'));
+        await fireEvent.press(screen.getByLabelText('Back to Local Radio'));
         await waitFor(() => expect(global.fetch).toHaveBeenCalledTimes(3));
         expect(screen.getByText('Local Radio')).toBeTruthy();
     });

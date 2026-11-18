@@ -32,6 +32,7 @@ export ANDROID_AVD_HOME="$AVD_HOME"
 log "Using Android SDK: $SDK_DIR"
 log "Using AVD home: $AVD_HOME"
 log "Starting emulator: $AVD_NAME"
+log "Screen profile: Xiaomi Mi 10T Pro (1080x2400, approximately 395 dpi)"
 log "Emulator acceleration: $EMULATOR_ACCEL"
 if [ "$EMULATOR_HEADLESS" = "1" ]; then
   log "Display mode: headless"
@@ -41,10 +42,11 @@ fi
 if [ "$EMULATOR_WIPE_DATA" = "1" ]; then
   log "Boot mode: full wipe"
 else
-  log "Boot mode: keep snapshot state for faster restarts"
+  log "Boot mode: cold boot with existing user data"
 fi
 
-EMULATOR_ARGS="-avd $AVD_NAME -no-audio -no-boot-anim -gpu swiftshader_indirect -accel $EMULATOR_ACCEL"
+# Cold boot so a saved snapshot cannot restore a different display size.
+EMULATOR_ARGS="-avd $AVD_NAME -skin 1080x2400 -no-snapshot-load -no-audio -no-boot-anim -gpu swiftshader_indirect -accel $EMULATOR_ACCEL"
 if [ "$EMULATOR_HEADLESS" = "1" ]; then
   EMULATOR_ARGS="$EMULATOR_ARGS -no-window"
 fi
@@ -79,6 +81,9 @@ while :; do
   fi
   sleep 2
 done
+
+# Match the screen's approximate pixel density for Android layout scaling.
+"$SDK_DIR/platform-tools/adb" shell wm density 395
 
 log "Emulator $AVD_NAME is ready on adb."
 wait "$EMULATOR_PID"

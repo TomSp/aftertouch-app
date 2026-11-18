@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {Stack, useLocalSearchParams, useRouter} from 'expo-router';
 import {useEffect, useRef, useState} from 'react';
-import {ActivityIndicator, Image, Keyboard, Pressable, ScrollView, StyleSheet, Text, TextInput, View} from 'react-native';
+import {ActivityIndicator, Image, Keyboard, Pressable, ScrollView, type ScrollViewInstance, StyleSheet, Text, TextInput, View} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {clearLibraryState} from '../libraryState';
 
@@ -106,7 +106,7 @@ export default function TuneInScreen() {
     const [browseItems, setBrowseItems] = useState<BrowseItem[]>([]);
     const [browseBreadcrumbs, setBrowseBreadcrumbs] = useState<BrowseBreadcrumb[]>([]);
     const [browsePath, setBrowsePath] = useState('');
-    const breadcrumbScrollRef = useRef<ScrollView>(null);
+    const breadcrumbScrollRef = useRef<ScrollViewInstance>(null);
     const [loading, setLoading] = useState(false);
     const [selecting, setSelecting] = useState(false);
     const [error, setError] = useState<string | null>(null);

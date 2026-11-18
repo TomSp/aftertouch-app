@@ -1,0 +1,10 @@
+{
+  "name": "@aftertouch/jest-deepmerge",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Prototype-safe deepmerge adapter for Jest configuration",
+  "main": "index.cjs",
+  "dependencies": {
+    "@fastify/deepmerge": "^3.2.4"
+  }
+}

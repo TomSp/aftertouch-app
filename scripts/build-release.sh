@@ -8,6 +8,35 @@ OUTPUT_DIR="$BUILD_DIR/artifacts"
 MODE="${1:-apk}"
 SDK_DIR="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-$ROOT_DIR/sdk/android-sdk}}"
 
+configure_java() {
+  if [ -z "${JAVA_HOME:-}" ]; then
+    JAVAC=$(command -v javac || true)
+    if [ -n "$JAVAC" ]; then
+      JAVA_HOME=$(dirname "$(dirname "$(readlink -f "$JAVAC")")")
+    else
+      for JDK_DIR in "${GRADLE_USER_HOME:-$HOME/.gradle}"/jdks/* /usr/lib/jvm/*; do
+        if [ -x "$JDK_DIR/bin/java" ] && [ -x "$JDK_DIR/bin/javac" ]; then
+          JAVA_HOME="$JDK_DIR"
+          break
+        fi
+      done
+    fi
+  fi
+
+  if [ ! -x "${JAVA_HOME:-}/bin/java" ] || [ ! -x "${JAVA_HOME:-}/bin/javac" ]; then
+    echo "A full JDK is required to build the Android app." >&2
+    echo "Set JAVA_HOME to a JDK installation containing bin/java and bin/javac." >&2
+    exit 1
+  fi
+
+  export JAVA_HOME
+  PATH="$JAVA_HOME/bin:$PATH"
+  export PATH
+  printf 'Using JDK: %s\n' "$JAVA_HOME"
+}
+
+configure_java
+
 "$ROOT_DIR/scripts/build.sh"
 
 preflight() {

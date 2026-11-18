@@ -86,7 +86,7 @@ describe('DeviceScreen API interactions', () => {
     });
 
     it('reads now-playing and volume status from their dedicated APIs', async () => {
-        const screen = renderDevice();
+        const screen = await renderDevice();
 
         await waitFor(() => expect(screen.getByText(/STANDBY/)).toBeTruthy());
         expect(screen.queryByText('Track: Not playing')).toBeNull();
@@ -112,10 +112,10 @@ describe('DeviceScreen API interactions', () => {
     });
 
     it('sends press and release requests through the key API', async () => {
-        const screen = renderDevice();
+        const screen = await renderDevice();
         await screen.findByText('25');
 
-        fireEvent.press(screen.getByText('Power On'));
+        await fireEvent.press(screen.getByText('Power On'));
 
         await waitFor(() => {
             const keyRequests = (global.fetch as jest.Mock).mock.calls.filter(([uri]) => uri.endsWith('/key'));
@@ -127,10 +127,10 @@ describe('DeviceScreen API interactions', () => {
     });
 
     it('switches to Bluetooth through the select API', async () => {
-        const screen = renderDevice();
+        const screen = await renderDevice();
         await screen.findByText('25');
 
-        fireEvent.press(screen.getByLabelText('Bluetooth'));
+        await fireEvent.press(screen.getByLabelText('Bluetooth'));
 
         await waitFor(() => {
             const selectRequests = (global.fetch as jest.Mock).mock.calls.filter(([uri]) => uri.endsWith('/select'));
@@ -142,10 +142,10 @@ describe('DeviceScreen API interactions', () => {
 
     it('provides haptic feedback when the power button is pressed and enabled', async () => {
         (AsyncStorage.getItem as jest.Mock).mockResolvedValue('true');
-        const screen = renderDevice();
+        const screen = await renderDevice();
         await screen.findByText('25');
 
-        fireEvent.press(screen.getByText('Power On'));
+        await fireEvent.press(screen.getByText('Power On'));
 
         await waitFor(() => {
             expect(require('../src/native/forcedVibration').vibrateBypass).toHaveBeenCalledWith(120);
@@ -155,10 +155,10 @@ describe('DeviceScreen API interactions', () => {
     });
 
     it('sets the next volume through the volume API', async () => {
-        const screen = renderDevice();
+        const screen = await renderDevice();
         await screen.findByText('25');
 
-        fireEvent.press(screen.getByLabelText('Increase volume'));
+        await fireEvent.press(screen.getByLabelText('Increase volume'));
 
         await waitFor(() => {
             const volumeRequests = (global.fetch as jest.Mock).mock.calls.filter(([uri, options]) => uri.endsWith('/volume') && options);
